@@ -9,6 +9,7 @@ app.configure(function(){
   app.use(express.bodyParser());
   app.use(app.router);
   app.set('views',__dirname + '/views');
+  app.set('view engine', 'jade');
 });
 
 app.configure('development', function(){
@@ -22,7 +23,7 @@ app.configure('production', function(){
 // games in progress
 var gip = [[]];
 
-app.get('/', function (req, res){
+app.get('/game', function (req, res){
   var sess = req.session;
   // add some sort of unique identifier to the cookie
 
@@ -30,6 +31,10 @@ app.get('/', function (req, res){
   // if so, add this user, otherwise create a new game and wait for another player
   res.send(sess.cookie);
   
+});
+
+app.get('/', function (req, res) {
+    res.render('index');
 });
 
 app.listen(3000);
