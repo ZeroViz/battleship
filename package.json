@@ -1,0 +1,14 @@
+{
+  "name"          : "battleship",
+  "description"   : "a clone of the game battleship",
+  "homepage"      : "https://github.com/ZeroViz/battleship",
+  "keywords"      : ["battleship", "game"],
+  "author"        : "Scott Hamilton",
+  "contributors": [
+                    { "name": "Brian Muckian"}
+                  ],
+  "dependencies"  : {
+                      "express"    : "2.4.3"
+                    },
+  "version"       : "0.0.1"
+}
