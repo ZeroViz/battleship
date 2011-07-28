@@ -1,40 +1,31 @@
-var express = require('express');
-var app = express.createServer();
+var app = require('express').createServer();
+var socket = require('socket.io').listen(app);
 
-app.configure(function(){
-  app.use(express.static(__dirname + '/public'));
-  app.use(express.cookieParser());
-  app.use(express.session({secret: 'asdf jkl;', cookie: {maxAge: 60000}}));
-  app.use(express.methodOverride());
-  app.use(express.bodyParser());
-  app.use(app.router);
-  app.set('views',__dirname + '/views');
-  app.set('view engine', 'jade');
+require('jade');
+app.set('view engine', 'jade');
+app.set('view options', {layout: false});
+
+app.get('/*.(js|css)', function(req, res){
+  res.sendfile("./public"+req.url);
 });
 
-app.configure('development', function(){
-  app.use(express.errorHandler({dumpExceptions: true, showStack: true}));
+app.get('/', function(req, res){
+	res.render('feed');	
 });
 
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
+var activeClients = 0;
 
-// games in progress
-var gip = [[]];
+socket.on('connection', function(client){ 
+  activeClients +=1;
+  socket.broadcast({clients:activeClients});
+  client.on('disconnect', function(){
+    clientDisconnect(client);
+  });
+}); 
 
-app.get('/game', function (req, res){
-  var sess = req.session;
-  // add some sort of unique identifier to the cookie
-
-  // check to see if there's a game started with only one player waiting for another,
-  // if so, add this user, otherwise create a new game and wait for another player
-  res.send(sess.cookie);
-  
-});
-
-app.get('/', function (req, res) {
-    res.render('index');
-});
+function clientDisconnect(client){
+  activeClients -=1;
+  client.broadcast({clients:activeClients});
+}
 
 app.listen(3000);
