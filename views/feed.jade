@@ -1,0 +1,19 @@
+!!! 5
+html(lang="en")
+  head
+    title nodeFeed
+    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+    script(type="text/javascript", src="http://cdn.socket.io/stable/socket.io.js")
+    script(type="text/javascript", src="/feed.js")
+  body
+    #heading
+      h1 News Feed
+    #content
+      #categories
+        ul#category_list
+      #feed
+        ul#feed_list
+    #footer
+      p 
+        span#client_count 0
+        |  connected clients
