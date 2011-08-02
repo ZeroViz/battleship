@@ -8,9 +8,9 @@
                     { "name": "Brian Muckian"}
                   ],
   "dependencies"  : {
-                      "express"    : "2.4.3",
+                      "express"    : "latest",
                       "jade"       : "latest",
-                      "socket.io"  : "0.6.17"
+                      "socket.io"  : "latest"
                     },
   "version"       : "0.0.1"
 }
