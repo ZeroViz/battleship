@@ -17,19 +17,10 @@ var Battleship = (function () {
 		status: [],
 		
 		// sets the size of the ship acording to their type
-		init_status: function () {
-			if (this.type === 'carrier') {
-				this.status = [0,0,0,0,0]
-			}
-			else if (this.type === 'battleship') {
-				this.status = [0,0,0,0]
-			}
-			else if (this.type === 'destroyer' || this.type === 'submerine') {
-				this.status = [0,0,0]
-			}
-			else if (this.type === 'cruiser') {
-				this.status = [0,0]
-			}
+		init_status: function (type) {
+			types = Object.create(Shiptype)
+			return types[type].status;
+			
 		},
 		
 		is_hit: function (location) {
@@ -41,7 +32,14 @@ var Battleship = (function () {
 			this.status[i] = 1;
 		}
 	}
-
+	
+	var Shiptype = {
+		carrier: {length: 5, status: [0,0,0,0,0]},
+		battleship: {length: 4, status: [0,0,0,0]},
+		destroyer: {length: 3, status: [0,0,0]},
+		submerine: {length: 3, status: [0,0,0]},
+		cruiser: {length: 2, status: [0,0]}
+	}
 
 	var Fleet = {
 		ships: []
@@ -68,26 +66,28 @@ var Battleship = (function () {
 		},
 		add_player_fleet: function (player_id, fleet) {
 			var boardsize = game.size;
-			if (this.seas.hasOwnProperty(player_id) && this.validate_fleet(fleet, boardsize)) {
-				this.seas[player_id].fleet = fleet;
+			var vfleet = this.validate_fleet(fleet, boardsize);
+			if (this.seas.hasOwnProperty(player_id) && vfleet) {
+				this.seas[player_id].fleet = vfleet;
 			}
 		},
 		validate_fleet: function (fleet, boardsize) {
-			for (i=0; i<=fleet.ships.length; i++){
+			for (i=0; i<fleet.ships.length; i++){
 				
 				var vship = Object.create(Ship);
 				
 				vship.type = fleet.ships[i].type;
 				vship.location = fleet.ships[i].location;
 				vship.orientation = fleet.ships[i].orientation;
-				vship.init_status();
+				vship.status = vship.init_status(vship.type);
 				
-				var size = vship.status.length;
-				var ship_end = game.get_ship_end(fleet.ship[i].location, fleet.ships[i].orientation, size);
+				var	size = vship.status.length;
+				var ship_end = game.get_ship_end(vship.location, vship.orientation, size);
+				if (ship_end === null){
+					return null;
 				}
+			}
 			return fleet;
-			// fails
-			return null;
 		},
 		
 		get_ship_end: function(loc, ori, size) {
@@ -103,6 +103,9 @@ var Battleship = (function () {
 			}
 			else if (ori === 'w'){
 				offset = [0,-size]
+			}
+			if (offset === null){
+				return null
 			}
 			return [loc[0]+offset[0], loc[1]+offset[1]]
 		}
@@ -154,3 +157,4 @@ game.add_player_fleet('ben', {
 	ships: [{type: 'carrier', location: [0,0], orientation: 's'},
 	        {type: 'destroyer', location: [3,3], orientation: 'e'}]
 });
+
