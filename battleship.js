@@ -7,6 +7,7 @@ if (typeof Object.create !== 'function') {
     };
 }
 
+
 var Battleship = (function () {
 
 	var Ship = {
@@ -17,23 +18,20 @@ var Battleship = (function () {
 		
 		// sets the size of the ship acording to their type
 		init_status: function (type) {
-			types = Object.create(Shiptype);
+			types = Object.create(Shiptype)
 			return types[type].status;
 			
 		},
 		
 		is_hit: function (location) {
-      var result = false;
 			if (location === this.location) {
-          result = true;
+				return True;
 			}
-			return result;
 		},
-
 		hit: function (location) {
 			this.status[i] = 1;
 		}
-	};
+	}
 	
 	var Shiptype = {
 		carrier: {length: 5, status: [0,0,0,0,0]},
@@ -41,20 +39,20 @@ var Battleship = (function () {
 		destroyer: {length: 3, status: [0,0,0]},
 		submerine: {length: 3, status: [0,0,0]},
 		cruiser: {length: 2, status: [0,0]}
-	};
+	}
 
 	var Fleet = {
 		ships: []
-	};
+	}
 
 	var Action = {
 		type: ''
-	};
+	}
 
 	var Sea = {
 		fleet: null,
-		actions: []
-	};
+		actions: [],
+	}
 
 	var Battle = {
 		players: [],
@@ -93,32 +91,32 @@ var Battleship = (function () {
 		},
 		
 		get_ship_end: function(loc, ori, size) {
-			var offset = null;
+			var offset = null
 			if (ori === 'n'){
-				offset = [-size,0];
+				offset = [-size,0]
 			}
 			else if (ori === 's'){
-				offset = [size,0];
+				offset = [size,0]
 			}
 			else if (ori === 'e'){
-				offset = [0,size];
+				offset = [0,size]
 			}
 			else if (ori === 'w'){
-				offset = [0,-size];
+				offset = [0,-size]
 			}
 			if (offset === null){
-				return null;
+				return null
 			}
-			return [loc[0]+offset[0], loc[1]+offset[1]];
+			return [loc[0]+offset[0], loc[1]+offset[1]]
 		}
-	};
+	}
 
 	var next_game_id = 17;
 	var games = {};
 
 	var get_next_game_id = function () {
 		return next_game_id++;
-	};
+	}
 	
 	var create_game = function (players, options) {
 		var game = Object.create(Battle);
@@ -131,11 +129,11 @@ var Battleship = (function () {
 		game.game_id = game_id;
 		games[game_id] = game;
 		return game;
-	};
+	}
 	
 	var get_game = function (game_id) {
 		return games[game_id];
-	};
+	}
 	
 	// public methods
 	var that = {};
@@ -150,7 +148,7 @@ var game = Battleship.create_game(['scott', 'ben'],
             {
                 ruleset: 'normal',
                 size: [10,10]
-            });
+            })
 game.add_player_fleet('scott', {
 	ships: [{type: 'carrier', location: [0,0], orientation: 's'},
 	        {type: 'destroyer', location: [3,3], orientation: 'e'}]
@@ -159,3 +157,4 @@ game.add_player_fleet('ben', {
 	ships: [{type: 'carrier', location: [0,0], orientation: 's'},
 	        {type: 'destroyer', location: [3,3], orientation: 'e'}]
 });
+

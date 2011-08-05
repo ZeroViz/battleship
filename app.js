@@ -10,7 +10,7 @@ var express = require('express'),
  
 require('jade');
 app.set('view engine', 'jade');
-app.set('view options', {layout: false});
+app.set('view options', {layout: true});
 
 app.configure(function () {
     app.use(express.cookieParser());
@@ -22,10 +22,8 @@ app.configure(function () {
 
 sio.configure(function (){
   sio.set('authorization', function (data, accept) {
-      console.log("whiskey");
-      var retval;
+      var result;
       if (data.headers.cookie) {
-          console.log("tango");
           data.cookie = parseCookie(data.headers.cookie);
           data.sessionID = data.cookie['express.sid'];
           // save the session store to the data object 
@@ -33,23 +31,39 @@ sio.configure(function (){
           data.sessionStore = sessionStore;
           sessionStore.get(data.sessionID, function (err, session) {
               if (err) {
-                  console.log("foxtrot");
-                  retval = accept(err.message, false);
+                  result = accept(err.message, false);
               } else {
-                  console.log("!?");
                   // create a session object, passing data as request and our
                   // just acquired session data
                   data.session = new Session(data, session);
-                  retval = accept(null, true);
+                  result = accept(null, true);
               }
           });
       } else {
          console.log("?!");
-         retval = accept('No cookie transmitted.', false);
+         result = accept('No cookie transmitted.', false);
       }
-      return retval;
+      return result;
   });
 });
+
+var games = [];
+function joinGame(player){
+  // add the player to an existing game or create 
+  // a new game then return the index of the game  
+  var i, joined = false;
+  for (i=0; i < games.length; i++){
+    if (games[i].length == 1){
+      games[i].push(player);
+      joined = true;
+      break;
+    };
+  };
+  if (!(joined)){
+    games.push([player]);
+  }
+  return i;
+};
 
 sio.sockets.on('connection', function(socket){ 
   console.log('connection!');
@@ -88,9 +102,7 @@ app.get('/public/*.(js|css)', function(req, res){
 });
 
 app.get('/', function(req, res){
-  console.log("who's on first?");
 	res.render('sessiontest', {sess: req.sessionID});	
-  console.log("what's on second?");
   sio.sockets.in(req.sessionID).send('Man, good to see you back!');
 });
 app.listen(3000);
