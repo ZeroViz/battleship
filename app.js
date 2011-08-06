@@ -59,12 +59,11 @@ sio.configure(function (){
               }
           });
       } else {
-         result = accept('No cookie transmitted.', false);
+          result = accept('No cookie transmitted.', false);
       }
       return result;
   });
 });
-
 
 sio.sockets.on('connection', function(socket){ 
   var hs = socket.handshake;
@@ -86,18 +85,20 @@ sio.sockets.on('connection', function(socket){
   socket.on('disconnect', function(){
     console.log('Socket ' + hs.sessionID + ' disconnected!');
   });
-}); 
 
 app.get('/public/*.(js|css)', function(req, res){
-  res.sendfile("."+req.url);
+    res.sendfile("."+req.url);
 });
 
 app.get('/', function(req, res){
-	res.render('game', {sess: req.sessionID});	
+    res.render('game', {sess: req.sessionID});	
+    //sio.sockets.in(req.sessionID).send('Man, good to see you back!');
 });
 app.listen(3000);
 
-//// function clientDisconnect(client){
-  //// activeClients -=1;
-  //// client.broadcast({clients:activeClients});
-//// }
+/*
+function clientDisconnect(client){
+    activeClients -=1;
+    client.broadcast({clients:activeClients});
+}
+*/
