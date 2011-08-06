@@ -20,33 +20,6 @@ app.configure(function () {
         key: 'express.sid'}));
 });
 
-sio.configure(function (){
-  sio.set('authorization', function (data, accept) {
-      var result;
-      if (data.headers.cookie) {
-          data.cookie = parseCookie(data.headers.cookie);
-          data.sessionID = data.cookie['express.sid'];
-          // save the session store to the data object 
-          // (as required by the Session constructor)
-          data.sessionStore = sessionStore;
-          sessionStore.get(data.sessionID, function (err, session) {
-              if (err) {
-                  result = accept(err.message, false);
-              } else {
-                  // create a session object, passing data as request and our
-                  // just acquired session data
-                  data.session = new Session(data, session);
-                  result = accept(null, true);
-              }
-          });
-      } else {
-         console.log("?!");
-         result = accept('No cookie transmitted.', false);
-      }
-      return result;
-  });
-});
-
 var games = [];
 function joinGame(player){
   // add the player to an existing game or create 
@@ -65,29 +38,47 @@ function joinGame(player){
   return i;
 };
 
+sio.configure(function (){
+  sio.set('authorization', function (data, accept) {
+      var result;
+      if (data.headers.cookie) {
+          data.cookie = parseCookie(data.headers.cookie);
+          data.sessionID = data.cookie['express.sid'];
+          data.gameID = joinGame(data.sessionID);
+          // save the session store to the data object 
+          // (as required by the Session constructor)
+          data.sessionStore = sessionStore;
+          sessionStore.get(data.sessionID, function (err, session) {
+              if (err) {
+                  result = accept(err.message, false);
+              } else {
+                  // create a session object, passing data as request and our
+                  // just acquired session data
+                  data.session = new Session(data, session);
+                  result = accept(null, true);
+              }
+          });
+      } else {
+         result = accept('No cookie transmitted.', false);
+      }
+      return result;
+  });
+});
+
+
 sio.sockets.on('connection', function(socket){ 
-  console.log('connection!');
   var hs = socket.handshake;
-  socket.join(hs.sessionID);
-  //check to see if there is a game that only has one player
-  //if so add this player to that game
-  //otherwise create a new game...and wait for another player
 
-  //var activeClients = 0;
-  //var currentGame = 1;
-  //var games = new Array();
+  var op = games[hs.gameID].filter(function(e){
+    var result;                                   
+    if (e!==hs.sessionID) {e = result;}
+    return result;
+  }).join(",");
 
-  // if (!games[currentGame]) {
-  //   games[currentGame] = 'foo';
-  // } else if (games[1].length == 1) {
-  //   games[currentGame].push('bar');
-  // } else {
-  //   currentGame += 1;
-  //   games[currentGame] = 'foo';
-  // }
+  socket.join(hs.gameID);
+  
+  sio.sockets.in(hs.gameID).send({challenger:op});
 
-  //// activeClients +=1;
-  //// socket.broadcast({clients:activeClients});
   socket.on('error', function(reason){
     console.log('unable to connect', reason);
   });
@@ -102,8 +93,7 @@ app.get('/public/*.(js|css)', function(req, res){
 });
 
 app.get('/', function(req, res){
-	res.render('sessiontest', {sess: req.sessionID});	
-  sio.sockets.in(req.sessionID).send('Man, good to see you back!');
+	res.render('game', {sess: req.sessionID});	
 });
 app.listen(3000);
 
