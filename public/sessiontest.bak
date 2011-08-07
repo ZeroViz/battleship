@@ -1,8 +1,0 @@
-(function($) {
-  $(document).ready(function () {
-    var socket = new io.Socket();
-    var wtf;
-    wtf = socket.connect();
-    alert(wtf);
-  });
-})(jQuery);

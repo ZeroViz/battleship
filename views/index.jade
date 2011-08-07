@@ -5,31 +5,30 @@ header
 section#lobby
     header
         h1 Find people to play with
+    #profile
+        p Your session is #{sess}
     #logged_in
-        ul
-            li Scott
-            li Jeff
+        ul#logged_in
         form#start
             input(type="button",value="Create Game")
             input(type="button",value="Invite Friend")
     #in_progress
         ul#full
-            li Scott vs. Ben
         ul#open
-            li Brian vs. ?
         ul#finished
-            li Eric vs. Justin
-section#game
-    header
-        h1 Scott vs. Jeff
-    section#game_1293
-        canvas(width="300",height="300")
-    section#game_9837
-        canvas(width="300",height="300")
+section#games
+    //
+        header
+            h1 Scott vs. Jeff
+        section#game_1293
+            canvas(width="300",height="300")
+        section#game_9837
+            canvas(width="300",height="300")
 section#chat
     section#lobby_chat
-        p hi
+    | <!--
     section#game_1293_chat
         p hello
     section#player_ben_chat
         p welcome
+    | -->

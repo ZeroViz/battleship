@@ -1,14 +1,14 @@
+- if (!title) var title = 'Battleship'
 !!! 5
 html(lang="en")
     head
         meta(charset="utf-8")
-        title Battleship
-        link(rel="stylesheet", href="style.css")
-        | <!--[if lt IE 9]
-        script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
-        script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
-        script(type="text/javascript", src="/socket.io/socket.io.js")
-        script(type="text/javascript", src="/battleship_socket_client.js")
-        | <![endif]-->
+        title= title
+        link(rel="stylesheet", href="css/style.css")
+        //if lt IE 9
+            script(src="http://html5shiv.googlecode.com/svn/trunk/html5.js")
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js")
+        script(src="/socket.io/socket.io.js")
+        script(src="/js/battleship_socket_client.js")
     body
         div!= body

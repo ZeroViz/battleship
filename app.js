@@ -1,24 +1,42 @@
+
+/**
+ * Module dependencies.
+ */
+
 var express = require('express'),
     MemoryStore = express.session.MemoryStore,
     sessionStore = new MemoryStore(),
-    connect = require('./node_modules/express/node_modules/connect'),
+    connect = require('express/node_modules/connect'),
     Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie,
     app = express.createServer(),
-    io = require('socket.io'),
-    sio = io.listen(app);
+    io = require('socket.io').listen(app),
+    Logger = require('socket.io/lib/logger'),
+    log = new Logger();
  
-require('jade');
-app.set('view engine', 'jade');
-app.set('view options', {layout: true});
+// Configuration
 
 app.configure(function () {
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
     app.use(express.cookieParser());
     app.use(express.session({
         store: sessionStore,
         secret: 'secret',
         key: 'express.sid'}));
+    app.use(app.router);
+    app.use(express.static(__dirname + '/public'));
 });
+
+app.configure('development', function () {
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+});
+
+app.configure('production', function () {
+    app.use(express.errorHandler());
+});
+
+// Custom
 
 var games = [];
 function joinGame(player){
@@ -38,8 +56,10 @@ function joinGame(player){
     return i;
 };
 
-sio.configure(function (){
-  sio.set('authorization', function (data, accept) {
+// Socket.IO
+
+io.configure(function (){
+  io.set('authorization', function (data, accept) {
       var result;
       if (data.headers.cookie) {
           data.cookie = parseCookie(data.headers.cookie);
@@ -65,7 +85,7 @@ sio.configure(function (){
   });
 });
 
-sio.sockets.on('connection', function(socket) {
+io.sockets.on('connection', function(socket) {
     var hs = socket.handshake;
 
     var op = games[hs.gameID].filter(function(e){
@@ -76,30 +96,26 @@ sio.sockets.on('connection', function(socket) {
 
     socket.join(hs.gameID);
   
-    sio.sockets.in(hs.gameID).send({challenger:op});
+    io.sockets.in(hs.gameID).send({challenger:op});
 
     socket.on('error', function(reason){
-        console.log('unable to connect', reason);
+        log.error('Socket unable to connect: ', reason);
     });
 
     socket.on('disconnect', function(){
-        console.log('Socket ' + hs.sessionID + ' disconnected!');
+        log.info('Socket ' + hs.sessionID + ' has disconnected');
     });
 });
 
-app.get('/public/*.(js|css)', function(req, res){
-    res.sendfile("."+req.url);
-});
+// Routes
 
 app.get('/', function(req, res){
-    res.render('game', {sess: req.sessionID});
-    //sio.sockets.in(req.sessionID).send('Man, good to see you back!');
+    res.render('index', {sess: req.sessionID});
 });
-app.listen(3000);
 
-/*
-function clientDisconnect(client){
-    activeClients -=1;
-    client.broadcast({clients:activeClients});
-}
-*/
+app.get('/feed', function (req, res) {
+    res.render('feed', { title: 'News Feed' });
+});
+
+app.listen(3000);
+log.info("Battleship server listening on port " + app.address().port + " in " + app.settings.env + " mode");
