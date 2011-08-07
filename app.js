@@ -22,20 +22,20 @@ app.configure(function () {
 
 var games = [];
 function joinGame(player){
-  // add the player to an existing game or create 
-  // a new game then return the index of the game  
-  var i, joined = false;
-  for (i=0; i < games.length; i++){
-    if (games[i].length == 1){
-      games[i].push(player);
-      joined = true;
-      break;
+    // add the player to an existing game or create 
+    // a new game then return the index of the game  
+    var i, joined = false;
+    for (i=0; i < games.length; i++){
+        if (games[i].length == 1){
+            games[i].push(player);
+            joined = true;
+            break;
+        };
     };
-  };
-  if (!(joined)){
-    games.push([player]);
-  }
-  return i;
+    if (!(joined)){
+        games.push([player]);
+    }
+    return i;
 };
 
 sio.configure(function (){
@@ -65,33 +65,34 @@ sio.configure(function (){
   });
 });
 
-sio.sockets.on('connection', function(socket){ 
-  var hs = socket.handshake;
+sio.sockets.on('connection', function(socket) {
+    var hs = socket.handshake;
 
-  var op = games[hs.gameID].filter(function(e){
-    var result;                                   
-    if (e!==hs.sessionID) {e = result;}
-    return result;
-  }).join(",");
+    var op = games[hs.gameID].filter(function(e){
+        var result;                                   
+        if (e!==hs.sessionID) {e = result;}
+        return result;
+    }).join(",");
 
-  socket.join(hs.gameID);
+    socket.join(hs.gameID);
   
-  sio.sockets.in(hs.gameID).send({challenger:op});
+    sio.sockets.in(hs.gameID).send({challenger:op});
 
-  socket.on('error', function(reason){
-    console.log('unable to connect', reason);
-  });
+    socket.on('error', function(reason){
+        console.log('unable to connect', reason);
+    });
 
-  socket.on('disconnect', function(){
-    console.log('Socket ' + hs.sessionID + ' disconnected!');
-  });
+    socket.on('disconnect', function(){
+        console.log('Socket ' + hs.sessionID + ' disconnected!');
+    });
+});
 
 app.get('/public/*.(js|css)', function(req, res){
     res.sendfile("."+req.url);
 });
 
 app.get('/', function(req, res){
-    res.render('game', {sess: req.sessionID});	
+    res.render('game', {sess: req.sessionID});
     //sio.sockets.in(req.sessionID).send('Man, good to see you back!');
 });
 app.listen(3000);
