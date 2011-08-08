@@ -10,7 +10,8 @@
   "dependencies"  : {
                       "express"    : "latest",
                       "jade"       : "latest",
-                      "socket.io"  : "latest"
+                      "socket.io"  : "latest",
+                      "log4js": "latest"
                     },
   "version"       : "0.0.1"
 }

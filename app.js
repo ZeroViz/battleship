@@ -2,17 +2,18 @@
 /**
  * Module dependencies.
  */
-
-var express = require('express'),
+var log4js = require('log4js'),
+    log = log4js.getLogger('app');
+    express = require('express'),
     MemoryStore = express.session.MemoryStore,
     sessionStore = new MemoryStore(),
     connect = require('express/node_modules/connect'),
     Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie,
     app = express.createServer(),
-    io = require('socket.io').listen(app),
-    Logger = require('socket.io/lib/logger'),
-    log = new Logger();
+    io = require('socket.io')
+            .listen(app, { logger: log4js.getLogger('socket'),
+                           'log level': log4js.levels['DEBUG'] });
  
 // Configuration
 
@@ -59,31 +60,32 @@ function joinGame(player){
 // Socket.IO
 
 io.configure(function (){
-  io.set('authorization', function (data, accept) {
-      var result;
-      if (data.headers.cookie) {
-          data.cookie = parseCookie(data.headers.cookie);
-          data.sessionID = data.cookie['express.sid'];
-          data.gameID = joinGame(data.sessionID);
-          // save the session store to the data object 
-          // (as required by the Session constructor)
-          data.sessionStore = sessionStore;
-          sessionStore.get(data.sessionID, function (err, session) {
-              if (err) {
-                  result = accept(err.message, false);
-              } else {
-                  // create a session object, passing data as request and our
-                  // just acquired session data
-                  data.session = new Session(data, session);
-                  result = accept(null, true);
-              }
-          });
-      } else {
-          result = accept('No cookie transmitted.', false);
-      }
-      return result;
-  });
+    io.set('authorization', function (data, accept) {
+        var result;
+        if (data.headers.cookie) {
+            data.cookie = parseCookie(data.headers.cookie);
+            data.sessionID = data.cookie['express.sid'];
+            data.gameID = joinGame(data.sessionID);
+            // save the session store to the data object 
+            // (as required by the Session constructor)
+            data.sessionStore = sessionStore;
+            sessionStore.get(data.sessionID, function (err, session) {
+                if (err) {
+                    result = accept(err.message, false);
+                } else {
+                    // create a session object, passing data as request and our
+                    // just acquired session data
+                    data.session = new Session(data, session);
+                    result = accept(null, true);
+                }
+            });
+        } else {
+            result = accept('No cookie transmitted.', false);
+        }
+        return result;
+    });
 });
+
 
 io.sockets.on('connection', function(socket) {
     var hs = socket.handshake;
