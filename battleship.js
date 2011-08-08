@@ -128,10 +128,10 @@ var Battleship = (function () {
                     for(inc=0; inc < ships.length; inc++){ 
                         var ship = this.get_ship_deration(ships[inc].location, ships[inc].orientation, 
                                     Object.create(ShipType)[ships[inc].type].length);
-                        //DEBUG somethings not right here
-                        for (l in ship){
-                            if (newLoc === ship[l]){
-                                affect = 'hit'
+                        for (l=0; l<ship.length; l++){
+                            if (newLoc[0] === ship[l][0] && newLoc[1] === ship[l][1]){
+                                affect = 'hit';
+                                break;
                             }
                         }
                     }
@@ -147,7 +147,32 @@ var Battleship = (function () {
         },
         
         add_report: function(action){
-            // updates game state
+            var ships = this.seas[action.id].fleet.ships;
+            //looks at list of reports
+            for(reps in action.reports){
+                // checks for hit
+                if (action.reports[reps].affect === 'hit'){
+                    // loops through ships
+                    for (i=0; i < ships.length; i++){
+                        // gets each ships set of cordinence
+                        var ship = this.get_ship_deration(ships[i].location, ships[i].orientation, 
+                                    Object.create(ShipType)[ships[i].type].length);
+                        
+                        // i think this way is better need to check it though
+                        /*
+                        if (ship[action.reports[reps].location]){
+                            this.seas[action.id].fleet.ships[i].status[ship[action.reports[reps].location]] = 1;
+                        }
+                        */
+                        
+                        for (l=0; l<ship.length; l++){
+                            if (action.reports[reps].location[0] === ship[l][0] && action.reports[reps].location[1] === ship[l][1]){
+                                this.seas[action.id].fleet.ships[i].status[l] = 1;
+                            }
+                        }
+                    }
+                }
+            }
         },
         
         validate_fleet: function (fleet, boardsize) {
@@ -204,9 +229,12 @@ var Battleship = (function () {
             return [loc[0]+offset[0], loc[1]+offset[1]];
         },
 
-        get_ship_deration: function(loc, ori, size){
+        get_ship_deration: function(cord, ori, size){
             var set = []
-            for (i=0; i < size; i++){
+            var loc = [cord[0], cord[1]]
+            set.push([loc[0], loc[1]])
+            for (inc=0; inc < size-1; inc
+            ++){
                 if (ori === 'n'){
                     set.push([loc[0]-=1, loc[1]])
                 }
@@ -281,4 +309,4 @@ game.do_deploy('ben', {
             {type: 'destroyer', location: [3,3], orientation: 'e'}]
 });
 
-game.do_enact('scott', {id: 'ben', type: 'shot', location: [0,2]});
+game.do_enact('scott', {id: 'ben', type: 'shot', location: [0,0]});
