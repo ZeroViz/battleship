@@ -1,7 +1,28 @@
-var log_event = function (event, data) {
-    $('#events').append('<div><p>' + event + '</p><pre>'
-                          + JSON.stringify(data) + '</pre></p>');
-}
+var log4js = {
+    getLogger: function (name) {
+        var log = function (level) {
+            var prefix = '[' + level.toUpperCase() + '] ' + name + ' - ';
+            return function (event, data) {
+                var msg = prefix + event + ': ' + JSON.stringify(data);
+                if (console[level]) {
+                    console[level](msg);
+                } else {
+                    console.error('console.' + level + ' not defined');
+                    console.error(msg);
+                }
+            };
+        };
+        return {
+            trace: log('trace'),
+            debug: log('debug'),
+            info: log('info'),
+            warn: log('warn'),
+            error: log('error')
+        };
+    }
+};
+
+var log = log4js.getLogger('client.io');
 
 $(document).ready(function () {
     var socket = io.connect();
@@ -13,11 +34,11 @@ $(document).ready(function () {
     // Game events
 
     socket.on('wait', function (data) {
-        log_event('wait', data);
+        log.info('wait', data);
     });
 
     socket.on('engage', function (data) {
-        log_event('engage', data);
+        log.info('engage', data);
     });
 
     socket.on('report', function (data) {

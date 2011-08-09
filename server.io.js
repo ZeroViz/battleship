@@ -4,7 +4,7 @@
  */
 
 var log4js = require('log4js'),
-    log = log4js.getLogger('battleship.io');
+    log = log4js.getLogger('server.io');
  
 /**
  * Battleship Game Stuff
