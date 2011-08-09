@@ -14,6 +14,8 @@ var Battleship = (function () {
     if (log) log.debug('');
     
     // look up objects
+    
+    // gives the length and status of each ship type
     var ShipType = {
         carrier: {length: 5, status: [0,0,0,0,0]},
         battleship: {length: 4, status: [0,0,0,0]},
@@ -22,10 +24,12 @@ var Battleship = (function () {
         cruiser: {length: 2, status: [0,0]}
     }
     
+    // holds rule requirements for each rule set
     var Ruleset = {
         normal: {size: [10,10]}
     }
     
+    // holds the shot offsets for each action type
     var ActionType = {
         shot: [[0,0]]
     }
@@ -39,8 +43,7 @@ var Battleship = (function () {
         
         // sets the size of the ship acording to their type
         init_status: function (type) {
-            types = Object.create(ShipType);
-            return types[type].status;
+            return Object.create(ShipType)[type].status;
             
         },
         
@@ -87,8 +90,7 @@ var Battleship = (function () {
         // creates a player id and sea for new player
         add_player: function (player_id) {
             this.players.push(player_id);
-            var sea = Object.create(Sea);
-            this.seas[player_id] = sea;
+            this.seas[player_id] = Object.create(Sea);
         },
         
         // deploys fleets
@@ -120,23 +122,22 @@ var Battleship = (function () {
                 
                 var offsets = Object.create(ActionType)[report.type];
                 // loops though offests
-                for (i=0; i < offsets.length; i++){
+                for (var i=0; i < offsets.length; i++){
                     var loc = offsets[i];
                     var newLoc = [report.location[0]+loc[0], report.location[1]+loc[1]];
                     var ships = this.seas[report.id].fleet.ships;
                     var affect = 'miss';
-                    for(inc=0; inc < ships.length; inc++){ 
-                        var ship = this.get_ship_deration(ships[inc].location, ships[inc].orientation, 
-                                    Object.create(ShipType)[ships[inc].type].length);
-                        for (l=0; l<ship.length; l++){
-                            if (newLoc[0] === ship[l][0] && newLoc[1] === ship[l][1]){
+                    for(var i2=0; i2 < ships.length; i2++){ 
+                        var ship = this.get_ship_deration(ships[i2].location, ships[i2].orientation, 
+                                    Object.create(ShipType)[ships[i2].type].length);
+                        for (var len=0; len<ship.length; len++){
+                            if (newLoc[0] === ship[len][0] && newLoc[1] === ship[len][1]){
                                 affect = 'hit';
                                 break;
                             }
                         }
                     }
-                    report.reports.push({'location': newLoc, 'affect': affect, 'ship': null})
-                    
+                    report.reports.push({'location': newLoc, 'affect': affect, 'ship': null}) 
                 }
                 
                 this.add_report(report);
@@ -148,26 +149,16 @@ var Battleship = (function () {
         
         add_report: function(action){
             var ships = this.seas[action.id].fleet.ships;
-            //looks at list of reports
             for(reps in action.reports){
-                // checks for hit
                 if (action.reports[reps].affect === 'hit'){
-                    // loops through ships
-                    for (i=0; i < ships.length; i++){
-                        // gets each ships set of cordinence
+                    for (var i=0; i < ships.length; i++){
                         var ship = this.get_ship_deration(ships[i].location, ships[i].orientation, 
                                     Object.create(ShipType)[ships[i].type].length);
-                        
-                        // i think this way is better need to check it though
-                        /*
-                        if (ship[action.reports[reps].location]){
-                            this.seas[action.id].fleet.ships[i].status[ship[action.reports[reps].location]] = 1;
-                        }
-                        */
-                        
-                        for (l=0; l<ship.length; l++){
-                            if (action.reports[reps].location[0] === ship[l][0] && action.reports[reps].location[1] === ship[l][1]){
-                                this.seas[action.id].fleet.ships[i].status[l] = 1;
+          
+                        for (var len=0; len<ship.length; len++){
+                            if (action.reports[reps].location[0] === ship[len][0] && action.reports[reps].location[1] === ship[len][1]){
+                                this.seas[action.id].fleet.ships[i].status[len] = 1;
+                                break;
                             }
                         }
                     }
@@ -176,7 +167,7 @@ var Battleship = (function () {
         },
         
         validate_fleet: function (fleet, boardsize) {
-            for (i=0; i<fleet.ships.length; i++){
+            for (var i=0; i<fleet.ships.length; i++){
                 
                 var vship = Object.create(Ship);
                 
@@ -185,8 +176,7 @@ var Battleship = (function () {
                 vship.orientation = fleet.ships[i].orientation;
                 vship.status = vship.init_status(vship.type);
                 
-                var    size = vship.status.length;
-                var ship_end = game.get_ship_end(vship.location, vship.orientation, size);
+                var ship_end = game.get_ship_end(vship.location, vship.orientation, vship.status.length);
                 
                 //TODO replace this mess with something a little nicer
                 if (ship_end === null || ship_end[0] >= boardsize[0] || ship_end[1] >= boardsize[1] 
@@ -231,10 +221,11 @@ var Battleship = (function () {
 
         get_ship_deration: function(cord, ori, size){
             var set = []
+            
             var loc = [cord[0], cord[1]]
             set.push([loc[0], loc[1]])
-            for (inc=0; inc < size-1; inc
-            ++){
+            
+            for (var i=0; i < size-1; i++){
                 if (ori === 'n'){
                     set.push([loc[0]-=1, loc[1]])
                 }
@@ -310,3 +301,6 @@ game.do_deploy('ben', {
 });
 
 game.do_enact('scott', {id: 'ben', type: 'shot', location: [0,0]});
+game.do_enact('ben', {id: 'scott', type: 'shot', location: [0,2]});
+game.do_enact('scott', {id: 'ben', type: 'shot', location: [3,4]});
+game.do_enact('ben', {id: 'scott', type: 'shot', location: [3,3]});
