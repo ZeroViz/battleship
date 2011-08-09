@@ -3,7 +3,7 @@
  * Module dependencies.
  */
 var log4js = require('log4js'),
-    log = log4js.getLogger('app');
+    log = log4js.getLogger('app'),
     express = require('express'),
     MemoryStore = express.session.MemoryStore,
     sessionStore = new MemoryStore(),
@@ -13,8 +13,9 @@ var log4js = require('log4js'),
     app = express.createServer(),
     io = require('socket.io')
             .listen(app, { logger: log4js.getLogger('socket'),
-                           'log level': log4js.levels['DEBUG'] });
- 
+                           'log level': log4js.levels['INFO'] }),
+    bsio = require('./server.io')(io);
+
 // Configuration
 
 app.configure(function () {
@@ -37,26 +38,6 @@ app.configure('production', function () {
     app.use(express.errorHandler());
 });
 
-// Custom
-
-var games = [];
-function joinGame(player){
-    // add the player to an existing game or create 
-    // a new game then return the index of the game  
-    var i, joined = false;
-    for (i=0; i < games.length; i++){
-        if (games[i].length == 1){
-            games[i].push(player);
-            joined = true;
-            break;
-        };
-    };
-    if (!(joined)){
-        games.push([player]);
-    }
-    return i;
-};
-
 // Socket.IO
 
 io.configure(function (){
@@ -65,7 +46,6 @@ io.configure(function (){
         if (data.headers.cookie) {
             data.cookie = parseCookie(data.headers.cookie);
             data.sessionID = data.cookie['express.sid'];
-            data.gameID = joinGame(data.sessionID);
             // save the session store to the data object 
             // (as required by the Session constructor)
             data.sessionStore = sessionStore;
@@ -89,24 +69,8 @@ io.configure(function (){
 
 io.sockets.on('connection', function(socket) {
     var hs = socket.handshake;
-
-    var op = games[hs.gameID].filter(function(e){
-        var result;                                   
-        if (e!==hs.sessionID) {e = result;}
-        return result;
-    }).join(",");
-
-    socket.join(hs.gameID);
-  
-    io.sockets.in(hs.gameID).send({challenger:op});
-
-    socket.on('error', function(reason){
-        log.error('Socket unable to connect: ', reason);
-    });
-
-    socket.on('disconnect', function(){
-        log.info('Socket ' + hs.sessionID + ' has disconnected');
-    });
+    // join private room for session
+    socket.join(hs.sessionID);
 });
 
 // Routes
@@ -116,8 +80,10 @@ app.get('/', function(req, res){
 });
 
 app.get('/feed', function (req, res) {
-    res.render('feed', { title: 'News Feed' });
+    res.render('feed', {title: 'News Feed'});
 });
 
 app.listen(3000);
-log.info("Battleship server listening on port " + app.address().port + " in " + app.settings.env + " mode");
+log.info("Battleship server listening on port %d in %s mode",
+         app.address().port,
+         app.settings.env);
