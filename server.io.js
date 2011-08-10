@@ -29,17 +29,16 @@ var waiting = [];
 function join_game(player_id) {
   
     if (waiting.length === 0) {
-      waiting.push(player_id);
-      log.debug('player %s added to waiting list', player_id);
-    }
-    else {
-      // create new game
-      log.debug('player %s added to start game', player_id);
-      waiting.push(player_id);
-      var game = Battleship.create_game(games.length + 1, waiting, { ruleset: {type: 'normal'} } );
-      games.push(game);
-      waiting = [];
-      return game;
+        waiting.push(player_id);
+        log.debug('player %s added to waiting list', player_id);
+    } else {
+        // create new game
+        log.debug('player %s added to start game', player_id);
+        waiting.push(player_id);
+        var game = Battleship.create_game(games.length + 1, waiting, { ruleset: {type: 'normal'} } );
+        games.push(game);
+        waiting = [];
+        return game;
     }
 
 };
