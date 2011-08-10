@@ -269,3 +269,5 @@ var Battleship = (function () {
     
     return that;
 })();
+
+if (module) module.exports = Battleship;
