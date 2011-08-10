@@ -45,20 +45,23 @@ function join_game(player_id) {
 
 var on_join = function (emit, data, player_id) {
     var game = join_game(player_id);
+    log.debug('waiting', JSON.stringify(waiting));
     if (waiting.length === 1) {
         log.debug('emitting wait to player %s', player_id);
         emit('wait');
     } else {
         // return ruleset object
-        log.debug('emitting engage to player %s, game %s', player_id, game.id);
-
+        var data = { id: game.id,
+                     type: 'normal',
+                     players: game.players.length }
+        log.debug('game %s has players %s', game.id, game.players);
         for (i = 0; i < game.players.length; i++ ) {
-          socket = player_socket[game.players[i]]; 
-          socket.emit('engage',
-               { id: game.id,
-                 type: 'normal',
-                 players: game.players.length }
-              );
+            var socket = player_socket[game.players[i]]; 
+            log.debug('emitting engage to player %s, game %s: %s',
+                      game.players[i],
+                      game.id,
+                      JSON.stringify(data));
+            socket.emit('engage', data);
         }
         return game.ruleset;
         // TODO: emit an 'engage' to opponents somehow
