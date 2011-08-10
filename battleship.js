@@ -26,7 +26,14 @@ var Battleship = (function () {
     
     // holds rule requirements for each rule set
     var Ruleset = {
-        normal: {size: [10,10]}
+        normal: {size: [10,10], 
+             ships:{battleship: 1,
+                    carrier: 1,
+                    destroyer: 1,
+                    submerine: 1,
+                    cruiser: 1
+             },
+        }
     }
     
     // holds the shot offsets for each action type
@@ -43,7 +50,7 @@ var Battleship = (function () {
         
         // sets the size of the ship acording to their type
         init_status: function (type) {
-            return Object.create(ShipType)[type].status;
+            return ShipType[type].status;
             
         },
         
@@ -95,7 +102,7 @@ var Battleship = (function () {
         
         // deploys fleets
         do_deploy: function (player_id, fleet) {
-            var boardsize = game.size;
+            var boardsize = game.ruleset.size;
             var vfleet = this.validate_fleet(fleet, boardsize);
             if (this.seas.hasOwnProperty(player_id) && vfleet) {
                 // addes modified and validated fleet to the players fleet 
@@ -110,7 +117,7 @@ var Battleship = (function () {
         
         // action prossesor
         do_enact: function (player_id, action){
-            var boardsize = game.size;
+            var boardsize = game.ruleset.size;
             var vaction = this.validate_action(action, boardsize);
             if (this.seas.hasOwnProperty(player_id) && vaction) {
                 // genrates a report to send back to client
@@ -129,7 +136,7 @@ var Battleship = (function () {
                     var affect = 'miss';
                     for(var i2=0; i2 < ships.length; i2++){ 
                         var ship = this.get_ship_deration(ships[i2].location, ships[i2].orientation, 
-                                    Object.create(ShipType)[ships[i2].type].length);
+                                    ShipType[ships[i2].type].length);
                         for (var len=0; len<ship.length; len++){
                             if (newLoc[0] === ship[len][0] && newLoc[1] === ship[len][1]){
                                 affect = 'hit';
@@ -153,7 +160,7 @@ var Battleship = (function () {
                 if (action.reports[reps].affect === 'hit'){
                     for (var i=0; i < ships.length; i++){
                         var ship = this.get_ship_deration(ships[i].location, ships[i].orientation, 
-                                    Object.create(ShipType)[ships[i].type].length);
+                                    ShipType[ships[i].type].length);
           
                         for (var len=0; len<ship.length; len++){
                             if (action.reports[reps].location[0] === ship[len][0] && action.reports[reps].location[1] === ship[len][1]){
@@ -171,6 +178,7 @@ var Battleship = (function () {
         },
         
         validate_fleet: function (fleet, boardsize) {
+            var required_ships = Ruleset[game.ruleset.type].ships
             for (var i=0; i<fleet.ships.length; i++){
                 
                 var vship = Object.create(Ship);
@@ -179,6 +187,8 @@ var Battleship = (function () {
                 vship.location = fleet.ships[i].location;
                 vship.orientation = fleet.ships[i].orientation;
                 vship.status = vship.init_status(vship.type);
+                
+                required_ships[vship.type] -= 1;
                 
                 var ship_end = game.get_ship_end(vship.location, vship.orientation, vship.status.length);
                 
@@ -189,6 +199,11 @@ var Battleship = (function () {
                     return null;
                 }
                 fleet.ships[i] = vship;
+            }
+            
+            if (required_ships['carrier'] != 0 || required_ships['battleship'] != 0 ||
+                required_ships['destroyer'] != 0 || required_ships['submerine'] != 0 || required_ships['cruiser'] != 0){
+                return null;
             }
             return fleet;
         },
@@ -254,7 +269,8 @@ var Battleship = (function () {
         
         game.id = game_id;
         game.ruleset = options.ruleset;
-        game.size = Ruleset[game.ruleset.type].size;
+        game.ruleset.size = Ruleset[game.ruleset.type].size;
+        geme.ruleset.ships = Ruleset[game.ruleset.type].ships
         
         for (player in players) {
             game.add_player(players[player]);

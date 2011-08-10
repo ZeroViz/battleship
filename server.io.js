@@ -24,20 +24,22 @@ function get_player_id(sessionID) {
 };
 
 var games = [];
-var waiting = [];
+var game_waiting = [];
+var deploy_waiting = [];
+var report_waiting = [];
 
 function join_game(player_id) {
   
-    if (waiting.length === 0) {
-        waiting.push(player_id);
+    if (game_waiting.length === 0) {
+        game_waiting.push(player_id);
         log.debug('player %s added to waiting list', player_id);
     } else {
         // create new game
         log.debug('player %s added to start game', player_id);
-        waiting.push(player_id);
-        var game = Battleship.create_game(games.length + 1, waiting, { ruleset: {type: 'normal'} } );
+        game_waiting.push(player_id);
+        var game = Battleship.create_game(games.length + 1, game_waiting, { ruleset: {type: 'normal'} } );
         games.push(game);
-        waiting = [];
+        game_waiting = [];
         return game;
     }
 
@@ -45,7 +47,7 @@ function join_game(player_id) {
 
 var on_join = function (emit, data, player_id) {
     var game = join_game(player_id);
-    if (waiting.length === 1) {
+    if (game_waiting.length === 1) {
         log.debug('emitting wait to player %s', player_id);
         emit('wait');
     } else {
@@ -57,10 +59,11 @@ var on_join = function (emit, data, player_id) {
           socket.emit('engage',
                { id: game.id,
                  type: 'normal',
+                 ships: game.ruleset.ships,
                  players: game.players.length }
               );
         }
-        return game.ruleset;
+        return game;
         // TODO: emit an 'engage' to opponents somehow
         // probably by adding an anonymous function to a queue
         // that is processed with a game "event" (non-socket)
@@ -68,8 +71,26 @@ var on_join = function (emit, data, player_id) {
 }
 
 var on_deploy = function (emit, data, player_id, game) {
-    // add fleet to sea object 
-    // and emit 'report', null
+    log.debug("player " + player_id + "submitted there fleet");
+    log.info(data);
+    var set_report = game.do_deploy(player_id, data);
+    if (set_report !== null){
+        deploy_waiting.push(player_id);
+        log.debug("player added to deploy waiting list")
+    } else {
+        log.debug("sending deploy error report");
+        emit("engage", set_report);
+    }
+    
+    if (deploy_waiting.length === 1) {
+        log.debug('emitting wait to player %s', player_id);
+        emit('wait');
+    } else {
+        for (i = 0; i < game.players.length; i++ ){
+            socket = player_socket[game.players[i]];
+            socket.emit("report", {})
+        }
+    }
 }
 
 var on_enact = function (emit, data, player_id, game) {
