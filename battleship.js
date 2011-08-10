@@ -166,6 +166,10 @@ var Battleship = (function () {
             }
         },
         
+        do_conclude: function(){
+            return game;
+        },
+        
         validate_fleet: function (fleet, boardsize) {
             for (var i=0; i<fleet.ships.length; i++){
                 
