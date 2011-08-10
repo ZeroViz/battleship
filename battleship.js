@@ -246,14 +246,6 @@ var Battleship = (function () {
             return set
         }    
     }
-    /*
-    var next_game_id = 17;
-    var games = {};
-
-    var get_next_game_id = function () {
-        return next_game_id++;
-    }
-    */
     
     // creates a populated game object ready to play
     var create_game = function (game_id, players, options) {
@@ -268,18 +260,7 @@ var Battleship = (function () {
         }
         return game;
         
-    }   
-    /*    
-        var game_id = get_next_game_id();
-        game.game_id = game_id;
-        games[game_id] = game;
-        return game;
     }
-    
-    var get_game = function (game_id) {
-        return games[game_id];
-    }
-    */
     
     // public methods
     var that = {};
@@ -288,23 +269,3 @@ var Battleship = (function () {
     
     return that;
 })();
-
-// node js server example
-var game = Battleship.create_game(17, ['scott', 'ben'],
-            {
-                ruleset: 'normal',
-                size: [10,10]
-            });
-game.do_deploy('scott', {
-    ships: [{type: 'carrier', location: [0,0], orientation: 's'},
-            {type: 'destroyer', location: [3,3], orientation: 'e'}]
-});
-game.do_deploy('ben', {
-    ships: [{type: 'carrier', location: [0,0], orientation: 's'},
-            {type: 'destroyer', location: [3,3], orientation: 'e'}]
-});
-
-game.do_enact('scott', {id: 'ben', type: 'shot', location: [0,0]});
-game.do_enact('ben', {id: 'scott', type: 'shot', location: [0,2]});
-game.do_enact('scott', {id: 'ben', type: 'shot', location: [3,4]});
-game.do_enact('ben', {id: 'scott', type: 'shot', location: [3,3]});
