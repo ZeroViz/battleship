@@ -252,6 +252,7 @@ var Battleship = (function () {
         
         var game = Object.create(Battle);
         
+        game.id = game_id;
         game.ruleset = options.ruleset;
         game.size = Ruleset[game.ruleset.type].size;
         
