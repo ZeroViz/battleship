@@ -5,13 +5,14 @@
   "keywords"      : ["battleship", "game"],
   "author"        : "Scott Hamilton",
   "contributors": [
-                    { "name": "Brian Muckian"}
+                    { "name": "Brian Muckian" }
                   ],
   "dependencies"  : {
                       "express"    : "latest",
                       "jade"       : "latest",
                       "socket.io"  : "latest",
-                      "log4js": "latest"
+                      "log4js"     : "latest",
+                      "vows"       : "latest"
                     },
   "version"       : "0.0.1"
 }
