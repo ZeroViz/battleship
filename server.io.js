@@ -22,28 +22,29 @@ function get_player_id(sessionID) {
 };
 
 var games = [];
+var waiting = [];
 
 function join_game(player_id) {
-    log.debug('player %s joining game', player_id);
-    // look for waiting game
-    for (var i = 0, len = games.length; i < len; ++i) {
-        if (games[i].players.length === 1 && games[i].players[0] !== player_id) {
-            // add to waiting game
-            games[i].players.push(player_id);
-            return games[i];
-        }
+  
+    if (waiting.length === 0) {
+      waiting.push(player_id);
+      log.debug('player %s added to waiting list', player_id);
     }
-    // create new game
-    var game = { id: games.length + 1,
-                 players: [player_id] };
-    games.push(game);
-    return game;
+    else {
+      // create new game
+      log.debug('player %s added to start game', player_id);
+      waiting.push(player_id);
+      var game = Battleship.create(games.length + 1, waiting, { ruleset: 'normal' } );
+      games.push(game);
+      return game;
+    }
+
 };
 
 var on_join = function (emit, data, player_id) {
     var game = join_game(player_id);
-    if (game.players.length === 1) {
-        log.debug('emitting wait to player %s, game %s', player_id, game.id);
+    if (waiting.length === 1) {
+        log.debug('emitting wait to player %s', player_id);
         emit('wait');
     } else {
         // return ruleset object
