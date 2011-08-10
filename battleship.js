@@ -276,7 +276,7 @@ var Battleship = (function () {
         game.id = game_id;
         game.ruleset = options.ruleset;
         game.ruleset.size = Ruleset[game.ruleset.type].size;
-        geme.ruleset.ships = Ruleset[game.ruleset.type].ships
+        game.ruleset.ships = Ruleset[game.ruleset.type].ships
         
         for (player in players) {
             game.add_player(players[player]);
