@@ -1,40 +1,86 @@
-var express = require('express');
-var app = express.createServer();
 
-app.configure(function(){
-  app.use(express.static(__dirname + '/public'));
-  app.use(express.cookieParser());
-  app.use(express.session({secret: 'asdf jkl;', cookie: {maxAge: 60000}}));
-  app.use(express.methodOverride());
-  app.use(express.bodyParser());
-  app.use(app.router);
-  app.set('views',__dirname + '/views');
-  app.set('view engine', 'jade');
+/**
+ * Module dependencies.
+ */
+var log4js = require('log4js'),
+    log = log4js.getLogger('app'),
+    express = require('express'),
+    MemoryStore = express.session.MemoryStore,
+    sessionStore = new MemoryStore(),
+    connect = require('express/node_modules/connect'),
+    Session = connect.middleware.session.Session,
+    parseCookie = connect.utils.parseCookie,
+    app = express.createServer(),
+    io = require('socket.io')
+            .listen(app, { logger: log4js.getLogger('socket'),
+                           'log level': log4js.levels['INFO'] }),
+    bsio = require('./server.io')(io);
+
+// Configuration
+
+app.configure(function () {
+    app.set('views', __dirname + '/views');
+    app.set('view engine', 'jade');
+    app.use(express.cookieParser());
+    app.use(express.session({
+        store: sessionStore,
+        secret: 'secret',
+        key: 'express.sid'}));
+    app.use(app.router);
+    app.use(express.static(__dirname + '/public'));
 });
 
-app.configure('development', function(){
-  app.use(express.errorHandler({dumpExceptions: true, showStack: true}));
+app.configure('development', function () {
+    app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-app.configure('production', function(){
-  app.use(express.errorHandler());
+app.configure('production', function () {
+    app.use(express.errorHandler());
 });
 
-// games in progress
-var gip = [[]];
+// Socket.IO
 
-app.get('/game', function (req, res){
-  var sess = req.session;
-  // add some sort of unique identifier to the cookie
-
-  // check to see if there's a game started with only one player waiting for another,
-  // if so, add this user, otherwise create a new game and wait for another player
-  res.send(sess.cookie);
-  
+io.configure(function (){
+    io.set('authorization', function (data, accept) {
+        var result;
+        if (data.headers.cookie) {
+            data.cookie = parseCookie(data.headers.cookie);
+            data.sessionID = data.cookie['express.sid'];
+            // save the session store to the data object 
+            // (as required by the Session constructor)
+            data.sessionStore = sessionStore;
+            sessionStore.get(data.sessionID, function (err, session) {
+                if (err) {
+                    result = accept(err.message, false);
+                } else {
+                    // create a session object, passing data as request and our
+                    // just acquired session data
+                    data.session = new Session(data, session);
+                    result = accept(null, true);
+                }
+            });
+        } else {
+            result = accept('No cookie transmitted.', false);
+        }
+        return result;
+    });
 });
 
-app.get('/', function (req, res) {
-    res.render('index');
+
+io.sockets.on('connection', function(socket) {
+    var hs = socket.handshake;
+    // join private room for session
+    socket.join(hs.sessionID);
+});
+
+// Routes
+
+app.get('/', function(req, res){
+    res.render('index', {sess: req.sessionID});
+});
+
+app.get('/feed', function (req, res) {
+    res.render('feed', {title: 'News Feed'});
 });
 
 app.get('/about', function (req, res) {
@@ -45,4 +91,6 @@ app.get('/contact', function (req, res) {
     res.render('contact');
 });
 app.listen(3000);
-
+log.info("Battleship server listening on port %d in %s mode",
+         app.address().port,
+         app.settings.env);

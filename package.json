@@ -8,8 +8,10 @@
                     { "name": "Brian Muckian"}
                   ],
   "dependencies"  : {
-                      "express"    : "2.4.3",
-                      "jade"       : "latest"
+                      "express"    : "latest",
+                      "jade"       : "latest",
+                      "socket.io"  : "latest",
+                      "log4js": "latest"
                     },
   "version"       : "0.0.1"
 }
