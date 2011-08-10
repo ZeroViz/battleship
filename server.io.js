@@ -68,14 +68,13 @@ var on_join = function (emit, data, player_id) {
                      players: game.players.length }
         log.debug('game %s created with players %s', game.id, game.players);
         notify_players(game, 'engage', data);
-        return game.ruleset;
+        return game;
     }
 }
 
 var on_deploy = function (emit, data, player_id, game) {
-    log.debug("player " + player_id + "submitted there fleet");
-    log.info(data);
-    var set_report = game.do_deploy(player_id, data);
+    log.debug("player " + player_id + " submitted there fleet");
+    var set_report = game.do_deploy(player_id, data, game);
     if (set_report !== null){
         deploy_waiting.push(player_id);
         log.debug("player added to deploy waiting list")
@@ -88,10 +87,9 @@ var on_deploy = function (emit, data, player_id, game) {
         log.debug('emitting wait to player %s', player_id);
         emit('wait');
     } else {
-        for (i = 0; i < game.players.length; i++ ){
-            socket = player_socket[game.players[i]];
-            socket.emit("report", {})
-        }
+        var data = {};
+	log.debug('sending placement conforamtion');
+	notify_players(game, "report", data);
     }
 }
 
@@ -124,11 +122,16 @@ var on_connection = function (socket) {
 
     socket.on('join', function (data) {
         log.debug('event join received %s', JSON.stringify(data));
-        game = on_join(socket.emit.bind(socket), data, player_id);
+        game = on_join(socket.emit.bind(socket), data, player_id);	
     });
 
-    socket.on('deploy', function (data) {
-        on_deploy(data, socket, player_id, game);
+    socket.on('deploy', function (data){
+        if (games[data.game_id-1]){
+            if (games[data.game_id-1].players[player_id]){
+       	        game = games[data.game_id-1];
+                on_deploy(data.fleet, socket, player_id, game);
+            }
+        }
     });
 
     socket.on('enact', function (data) {

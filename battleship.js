@@ -102,9 +102,9 @@ var Battleship = (function () {
         },
         
         // deploys fleets
-        do_deploy: function (player_id, fleet) {
+        do_deploy: function (player_id, fleet, game) {
             var boardsize = game.ruleset.size;
-            var vfleet = this.validate_fleet(fleet, boardsize);
+            var vfleet = this.validate_fleet(fleet, boardsize, game);
             if (this.seas.hasOwnProperty(player_id) && vfleet) {
                 // addes modified and validated fleet to the players fleet 
                 // and returns the updated fleet to client
@@ -178,7 +178,7 @@ var Battleship = (function () {
             return game;
         },
         
-        validate_fleet: function (fleet, boardsize) {
+        validate_fleet: function (fleet, boardsize, game) {
             var required_ships = Ruleset[game.ruleset.type].ships
             for (var i=0; i<fleet.ships.length; i++){
                 
