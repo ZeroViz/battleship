@@ -12,6 +12,7 @@ var Battleship = require('./battleship');
  */
 
 var players = {};
+var player_socket = {};
 
 function get_player_id(sessionID) {
     if (!players[sessionID]) {
@@ -35,8 +36,9 @@ function join_game(player_id) {
       // create new game
       log.debug('player %s added to start game', player_id);
       waiting.push(player_id);
-      var game = Battleship.create(games.length + 1, waiting, { ruleset: 'normal' } );
+      var game = Battleship.create_game(games.length + 1, waiting, { ruleset: {type: 'normal'} } );
       games.push(game);
+      waiting = [];
       return game;
     }
 
@@ -50,16 +52,20 @@ var on_join = function (emit, data, player_id) {
     } else {
         // return ruleset object
         log.debug('emitting engage to player %s, game %s', player_id, game.id);
-        emit('engage',
-             { id: game.id,
-               type: 'normal',
-               players: game.players.length }
-            );
+
+        for (i = 0; i < game.players.length; i++ ) {
+          socket = player_socket[game.players[i]]; 
+          socket.emit('engage',
+               { id: game.id,
+                 type: 'normal',
+                 players: game.players.length }
+              );
+        }
+        return game.ruleset;
         // TODO: emit an 'engage' to opponents somehow
         // probably by adding an anonymous function to a queue
         // that is processed with a game "event" (non-socket)
     }
-    return game;
 }
 
 var on_deploy = function (emit, data, player_id, game) {
@@ -83,11 +89,14 @@ var on_connection = function (socket) {
     var hs = socket.handshake;
     var s = hs.session;
 
+
     if (!s.player_id) {
         s.player_id = get_player_id(hs.sessionID);
     }
     var player_id = s.player_id;
     var game;
+
+    player_socket[ s.player_id  ] = socket;
 
     // Game events
 
