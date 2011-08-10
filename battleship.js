@@ -1,3 +1,6 @@
+// nodejs server side requires
+if (require) var log4js = require('log4js');
+
 // allows object prototypal inheritance
 if (typeof Object.create !== 'function') {
     Object.create = function (o) {
@@ -9,9 +12,7 @@ if (typeof Object.create !== 'function') {
 
 var Battleship = (function () {
     
-    var log = null;
-    
-    if (log) log.debug('');
+    var log = log4js ? log4js.getLogger('battleship') : null;
     
     // look up objects
     
@@ -65,23 +66,23 @@ var Battleship = (function () {
     }
 
     var Fleet = {
-        ships: []
+        ships: null
     }
 
     var Action = {
         id: null,
         type: '',
-        location: [],
-        reports: []
+        location: null,
+        reports: null
     }
 
     var Sea = {
         fleet: null,
-        actions: []
+        actions: null
     }
     
     var Report = {
-        location: [],
+        location: null,
         affect: '',
         ship: null
     }
@@ -89,8 +90,8 @@ var Battleship = (function () {
 
     // game logic
     var Battle = {
-        players: [],
-        seas: {},
+        players: null,
+        seas: null,
         size: null,
         ruleset: null,
         
@@ -265,7 +266,12 @@ var Battleship = (function () {
     // creates a populated game object ready to play
     var create_game = function (game_id, players, options) {
         
+        log && log.debug('create_game players received: %s', players);
         var game = Object.create(Battle);
+        game.players = [];
+        game.seas = {};
+
+        log && log.debug('create_game initial players: %s', game.players);
         
         game.id = game_id;
         game.ruleset = options.ruleset;
@@ -275,6 +281,7 @@ var Battleship = (function () {
         for (player in players) {
             game.add_player(players[player]);
         }
+        log && log.debug('create_game set players: %s', game.players);
         return game;
         
     }
@@ -282,6 +289,7 @@ var Battleship = (function () {
     // public methods
     var that = {};
     that.create_game = create_game;
+    that.log = log;
     //that.get_game = get_game;
     
     return that;

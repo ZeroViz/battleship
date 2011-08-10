@@ -12,9 +12,8 @@ var Battleship = require('./battleship');
  */
 
 var players = {};
-var player_socket = {};
 
-function get_player_id(sessionID) {
+var get_player_id = function (sessionID) {
     if (!players[sessionID]) {
         players[sessionID] = Object.keys(players).length + 1;
         log.debug('session %s given player id %s',
@@ -23,12 +22,24 @@ function get_player_id(sessionID) {
     return players[sessionID];
 };
 
+var player_socket = {};
+var notify_players = function (game, event, data) {
+    game.players.forEach(function (player_id) {
+        log.debug('emitting game %s to player %s - %s: %s',
+                  game.id,
+                  player_id,
+                  event,
+                  JSON.stringify(data));
+        player_socket[player_id].emit(event, data);
+    });
+};
+
 var games = [];
 var game_waiting = [];
 var deploy_waiting = [];
 var report_waiting = [];
 
-function join_game(player_id) {
+var join_game = function (player_id) {
   
     if (game_waiting.length === 0) {
         game_waiting.push(player_id);
@@ -52,21 +63,12 @@ var on_join = function (emit, data, player_id) {
         emit('wait');
     } else {
         // return ruleset object
-        log.debug('emitting engage to player %s, game %s', player_id, game.id);
-
-        for (i = 0; i < game.players.length; i++ ) {
-          socket = player_socket[game.players[i]]; 
-          socket.emit('engage',
-               { id: game.id,
-                 type: 'normal',
-                 ships: game.ruleset.ships,
-                 players: game.players.length }
-              );
-        }
-        return game;
-        // TODO: emit an 'engage' to opponents somehow
-        // probably by adding an anonymous function to a queue
-        // that is processed with a game "event" (non-socket)
+        var data = { id: game.id,
+                     type: 'normal',
+                     players: game.players.length }
+        log.debug('game %s created with players %s', game.id, game.players);
+        notify_players(game, 'engage', data);
+        return game.ruleset;
     }
 }
 
