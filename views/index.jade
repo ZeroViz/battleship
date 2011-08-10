@@ -18,6 +18,14 @@ section#lobby
         ul#open
         ul#finished
 section#games
+    header
+        h1 Your Game
+    div
+        input(type="button",value="emit",disabled,id="emit_button")
+    div
+        input(type="text",value="join",id="emit_event")
+    div
+        textarea(value="{}",rows=5,cols=40,id="emit_data")
     //
         header
             h1 Scott vs. Jeff

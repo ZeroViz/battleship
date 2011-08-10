@@ -50,6 +50,17 @@ $(document).ready(function () {
     });
 
     socket.on('connect', function () {
-        socket.emit('join');
+        $('#emit_button').removeAttr('disabled');
+    });
+
+    $('#emit_button').click(function () {
+        var event = $('#emit_event').val();
+        var data = $('#emit_data').val();
+        try {
+            data = data === '' ? null : JSON.parse(data);
+            socket.emit(event, data);
+        } catch (err) {
+            alert('bad event data json ' + JSON.stringify(err));
+        }
     });
 });
