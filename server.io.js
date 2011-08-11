@@ -126,12 +126,7 @@ var on_connection = function (socket) {
     });
 
     socket.on('deploy', function (data){
-        if (games[data.game_id-1]){
-            if (games[data.game_id-1].players[player_id]){
-       	        game = games[data.game_id-1];
-                on_deploy(data.fleet, socket, player_id, game);
-            }
-        }
+        on_deploy(data, socket, player_id, game);
     });
 
     socket.on('enact', function (data) {

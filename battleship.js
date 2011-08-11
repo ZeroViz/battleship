@@ -102,9 +102,9 @@ var Battleship = (function () {
         },
         
         // deploys fleets
-        do_deploy: function (player_id, fleet, game) {
-            var boardsize = game.ruleset.size;
-            var vfleet = this.validate_fleet(fleet, boardsize, game);
+        do_deploy: function (player_id, fleet) {
+            var boardsize = this.ruleset.size;
+            var vfleet = this.validate_fleet(fleet, boardsize);
             if (this.seas.hasOwnProperty(player_id) && vfleet) {
                 // addes modified and validated fleet to the players fleet 
                 // and returns the updated fleet to client
@@ -118,7 +118,7 @@ var Battleship = (function () {
         
         // action prossesor
         do_enact: function (player_id, action){
-            var boardsize = game.ruleset.size;
+            var boardsize = this.ruleset.size;
             var vaction = this.validate_action(action, boardsize);
             if (this.seas.hasOwnProperty(player_id) && vaction) {
                 // genrates a report to send back to client
@@ -178,8 +178,8 @@ var Battleship = (function () {
             return game;
         },
         
-        validate_fleet: function (fleet, boardsize, game) {
-            var required_ships = Ruleset[game.ruleset.type].ships
+        validate_fleet: function (fleet, boardsize) {
+            var required_ships = Ruleset[this.ruleset.type].ships
             for (var i=0; i<fleet.ships.length; i++){
                 
                 var vship = Object.create(Ship);
@@ -191,7 +191,7 @@ var Battleship = (function () {
                 
                 required_ships[vship.type] -= 1;
                 
-                var ship_end = game.get_ship_end(vship.location, vship.orientation, vship.status.length);
+                var ship_end = this.get_ship_end(vship.location, vship.orientation, vship.status.length);
                 
                 //TODO replace this mess with something a little nicer
                 if (ship_end === null || ship_end[0] >= boardsize[0] || ship_end[1] >= boardsize[1] 
@@ -210,7 +210,7 @@ var Battleship = (function () {
         },
         
         validate_action: function(action, boardsize){
-            if (action.type === 'shot' && game.seas.hasOwnProperty(action.id)){
+            if (action.type === 'shot' && this.seas.hasOwnProperty(action.id)){
                 if (action.location[0] < boardsize[0] && action.location[1] < boardsize[1] 
                     && action.location[0] >= 0 && action.location[1] >= 0){
                         return action;
