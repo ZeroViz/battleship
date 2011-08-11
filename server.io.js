@@ -39,37 +39,28 @@ var game_waiting = [];
 var deploy_waiting = [];
 var report_waiting = [];
 
-var join_game = function (player_id) {
-  
-    if (game_waiting.length === 0) {
-        game_waiting.push(player_id);
-        log.debug('player %s added to waiting list', player_id);
-    } else {
-        // create new game
-        log.debug('player %s added to start game', player_id);
-        game_waiting.push(player_id);
-        var game = Battleship.create_game(games.length + 1, game_waiting, { ruleset: {type: 'normal'} } );
-        games.push(game);
-        game_waiting = [];
-        return game;
-    }
-
-};
-
-var on_join = function (emit, data, player_id) {
-    var game = join_game(player_id);
-    if (game_waiting.length === 1) {
-        log.debug('emitting wait to player %s', player_id);
-        emit('wait');
-    } else {
-        // return ruleset object
-        var data = { id: game.id,
-                     type: 'normal',
-                     players: game.players.length }
-        log.debug('game %s created with players %s', game.id, game.players);
-        notify_players(game, 'engage', data);
-        return game;
-    }
+var on_join = function (socket, data, player_id, game) {
+  game_waiting.push([player_id, game]);
+  log.debug('player %s added to waiting list', player_id);
+  if (game_waiting.length > 1) {
+    // create new game
+    var game = Battleship.create_game(games.length + 1,
+                                      game_waiting.map(function(v){return v[0]}),
+                                      { ruleset: {type: 'normal'} } );
+    game_waiting.map(function(v){v[1].push(game)});
+    games.push(game);
+    game_waiting = [];
+    // return ruleset object
+    var data = { id: game.id,
+                 type: 'normal',
+                 players: game.players.length }
+    log.debug('game %s created with players %s', game.id, game.players);
+    notify_players(game, 'engage', data);
+  } else {
+    // wait for another player
+    log.debug('emitting wait to player %s', player_id);
+    socket.emit('wait');
+  }
 }
 
 var on_deploy = function (emit, data, player_id, game) {
@@ -104,48 +95,57 @@ var on_enact = function (emit, data, player_id, game) {
  */
 
 var on_connection = function (socket) {
-    log.trace('on_connection');
+  log.trace('on_connection');
 
-    var hs = socket.handshake;
-    var s = hs.session;
+  var hs = socket.handshake;
+  var s = hs.session;
 
+  if (!s.player_id) {
+    s.player_id = get_player_id(hs.sessionID);
+  }
+  var player_id = s.player_id;
+  var game = [];
 
-    if (!s.player_id) {
-        s.player_id = get_player_id(hs.sessionID);
+  player_socket[ s.player_id  ] = socket;
+
+  // Game events
+
+  socket.on('join', function (data) {
+    log.debug('event join received %s', JSON.stringify(data));
+    on_join(socket, data, player_id, game);	
+  });
+
+  socket.on('deploy', function (data){
+    log.debug('event deploy received %s', JSON.stringify(data));
+    try {
+      on_deploy(data, socket, player_id, game[0]);
+    } catch (err) {
+      socket.emit('engage', { errors: ['bad deploy']});
     }
-    var player_id = s.player_id;
-    var game;
+  });
 
-    player_socket[ s.player_id  ] = socket;
+  socket.on('enact', function (data) {
+    log.debug('event enact received %s', JSON.stringify(data));
+    try {
+      on_enact(data, socket, player_id, game[0]);
+    } catch (err) {
+      socket.emit('report', { errors: ['bad enact']});
+    }
+  });
 
-    // Game events
+  // Standard events
 
-    socket.on('join', function (data) {
-        log.debug('event join received %s', JSON.stringify(data));
-        game = on_join(socket.emit.bind(socket), data, player_id);	
-    });
+  socket.on('error', function (err) {
+    log.error('socket error: ' + err);
+  });
 
-    socket.on('deploy', function (data){
-        on_deploy(data, socket, player_id, game);
-    });
-
-    socket.on('enact', function (data) {
-        on_enact(data, socket, player_id, game);
-    });
-
-    // Standard events
-
-    socket.on('error', function (err) {
-        log.error('socket error: ' + err);
-    });
-
-    socket.on('disconnect', function () {
-        log.trace('on_disconnect');
-    });
+  socket.on('disconnect', function () {
+    log.trace('on_disconnect');
+  });
 }
 
 // Exports
 
 module.exports = function (io) {
-    io.sockets.on('connection', on_connection);
+  io.sockets.on('connection', on_connection);
 };
