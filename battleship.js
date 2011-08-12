@@ -12,89 +12,138 @@ if (typeof Object.create !== 'function') {
   };
 }
 
+// new_constructor
+var new_constructor = function (extend, initializer, methods) {
+  var func,
+      prototype = Object.create(extend && extend.prototype);
+
+  if (methods) {
+    methods.keys().forEach(function (key) {
+      prototype[key] = methods[key];
+    });
+  }
+
+  func = function () {
+    var that = Object.create(prototype);
+    if (typeof initializer === 'function') {
+      initializer.apply(that, arguments);
+    }
+    return that;
+  };
+  func.prototype = prototype;
+  prototype.constructor = func;
+  return func;
+};
+
 var Battleship = (function () {
 
-  var log = log4js ? log4js.getLogger('battleship') : null,
+  var log = log4js ? log4js.getLogger('battleship') : null;
 
     // look up objects
 
     // gives the length and status of each ship type
-    ShipType = {
-      carrier: {length: 5, status: [0, 0, 0, 0, 0]},
-      battleship: {length: 4, status: [0, 0, 0, 0]},
-      destroyer: {length: 3, status: [0, 0, 0]},
-      submarine: {length: 3, status: [0, 0, 0]},
-      cruiser: {length: 2, status: [0, 0]}
-    },
+  ShipType = {
+    carrier: {length: 5, status: [0, 0, 0, 0, 0]},
+    battleship: {length: 4, status: [0, 0, 0, 0]},
+    destroyer: {length: 3, status: [0, 0, 0]},
+    submarine: {length: 3, status: [0, 0, 0]},
+    cruiser: {length: 2, status: [0, 0]}
+  }
 
     // holds rule requirements for each rule set
-    Ruleset = {
-      normal: { size: [10, 10],
-                ships: { battleship: 1,
-                         carrier: 1,
-                         destroyer: 1,
-                         submarine: 1,
-                         cruiser: 1
-                       }
-              }
-    };
+  Ruleset = {
+    normal: { size: [10, 10],
+              ships: { battleship: 1,
+                       carrier: 1,
+                       destroyer: 1,
+                       submarine: 1,
+                       cruiser: 1
+                     }
+            }
+  };
 
   // holds the shot offsets for each action type
   var ActionType = {
     shot: [[0, 0]]
   };
 
-  // game object
-  var Ship = {
-    type: null,
-    location: null,
-    orientation: null,
-    status: null,
+  // game object constructor function
+  // will map constructor functions over lists to ensure proper deep copy
+  var Ship = function (spec) {
+    var ship = {};
+    spec = spec || {};
+    ship.type = spec.type || 'battleship';
+    ship.loc = spec.loc || [0, 0];
+    ship.ori = spec.ori || 'x';
+    ship.size = Ship.size[ship.type];
+    ship.status = [];
+    return ship;
+  };
+  Ship.size = {
+    carrier: 5,
+    battleship: 4,
+    destroyer: 3,
+    submarine: 3,
+    cruiser: 2
+  };
 
-    // sets the size of the ship acording to their type
-    init_status: function (type) {
-      return ShipType[type].status;
+  var Fleet = function (spec) {
+    var fleet = {};
+    spec = spec || {};
+    fleet.ships = spec.ships.map(Ship) || [];
+    return fleet;
+  };
+
+  var Action = function (spec) {
+    var action = {};
+    spec = spec || {};
+    action.id = spec.id || null;
+    action.type = spec.type || 'shot';
+    action.loc = spec.loc || [0, 0];
+    action.reports = spec.reports.map(Report) || [];
+    return action;
+  };
+
+  var Sea = function (spec) {
+    var sea = {};
+    spec = spec || {};
+    sea.fleet = Fleet(spec.fleet) || null;
+    sea.actions = spec.actions.map(Action) || [];
+  };
+
+  var Report = function (spec) {
+    var report = {};
+    spec = spec || {};
+    report.loc = spec.loc || [0, 0];
+    report.affect = spec.affect || null;
+    // optional properties
+    if (spec.ship) {
+      report.ship = Ship(spec.ship);
     }
   };
 
-  var Fleet = {
-    ships: null
-  };
-
-  var Action = {
-    id: null,
-    type: '',
-    location: null,
-    reports: null
-  };
-
-  var Sea = {
-    fleet: null,
-    actions: null
-  };
-
-  var Report = {
-    location: null,
-    affect: '',
-    ship: null
-  };
-
-
   // game logic
-  var Battle = {
-    players: null,
-    seas: null,
-    size: null,
-    ruleset: null,
+  var Battle = function (spec) {
+    var battle = {};
+    spec = spec || {};
+    battle.players = spec.players || [];
+    battle.seas = {};
+    if (spec.seas) {
+      spec.seas.keys.forEach(function (player_id) {
+        battle.seas[player_id] = spec.seas[player_id];
+      });
+    }
+    battle.size = spec.size || [10, 10];
+    battle.ruleset = spec.ruleset || Ruleset.normal;
 
     // creates a player id and sea for new player
-    add_player: function (player_id) {
+    battle.add_player = function (player_id) {
       this.players.push({ id: player_id });
       this.seas[player_id] = Object.create(Sea);
-    },
+    };
 
     // deploys fleets
-    do_deploy: function (player_id, fleet) {
+    battle.do_deploy = function (player_id, fleet) {
       var boardsize = this.ruleset.size;
       var vfleet = this.validate_fleet(fleet, boardsize);
       if (this.seas.hasOwnProperty(player_id) && vfleet) {
@@ -106,10 +155,10 @@ var Battleship = (function () {
       }
       // if validation failes sends an error back to client
       return null;
-    },
+    };
 
     // action prossesor
-    do_enact: function (player_id, action) {
+    battle.do_enact = function (player_id, action) {
       var boardsize = this.ruleset.size;
       var vaction = this.validate_action(action, boardsize);
       var i, i2, len;
@@ -146,9 +195,9 @@ var Battleship = (function () {
       }
       // if validation failes sends an error back to client
       return null;
-    },
+    };
 
-    add_report: function (action) {
+    battle.add_report = function (action) {
       var ships = this.seas[action.id].fleet.ships;
       action.reports.forEach(function (reps) {
         var i, len;
@@ -166,9 +215,9 @@ var Battleship = (function () {
           }
         }
       });
-    },
+    };
 
-    validate_fleet: function (fleet, boardsize) {
+    battle.validate_fleet = function (fleet, boardsize) {
       var required_ships = Ruleset[this.ruleset.type].ships;
       var i;
       for (i = 0; i < fleet.ships.length; i += 1) {
@@ -201,9 +250,9 @@ var Battleship = (function () {
         return null;
       }
       return fleet;
-    },
+    };
 
-    validate_action: function (action, boardsize) {
+    battle.validate_action = function (action, boardsize) {
       if (action.type === 'shot' && this.seas.hasOwnProperty(action.id)) {
         if (action.location[0] < boardsize[0] &&
             action.location[1] < boardsize[1] &&
@@ -213,9 +262,9 @@ var Battleship = (function () {
         }
       }
       return null;
-    },
+    };
 
-    get_ship_end: function (loc, ori, size) {
+    battle.get_ship_end = function (loc, ori, size) {
       switch (ori) {
       case 'n':
         return [loc[0] - size, loc[1]];
@@ -226,9 +275,9 @@ var Battleship = (function () {
       case 'w':
         return [loc[0], loc[1] - size];
       }
-    },
+    };
 
-    get_ship_deration: function (loc, ori, size) {
+    battle.get_ship_deration = function (loc, ori, size) {
       var locs = [],
         x = loc[0],
         y = loc[1],
@@ -254,15 +303,14 @@ var Battleship = (function () {
         }
       }
       return locs;
-    }
+    };
+    return battle;
   };
 
   // creates a populated game object ready to play
   var create_game = function (game_id, players, options) {
 
-    var game = Object.create(Battle);
-    game.players = [];
-    game.seas = {};
+    var game = Battle();
 
     game.id = game_id;
     game.ruleset = options.ruleset;

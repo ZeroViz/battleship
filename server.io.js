@@ -67,7 +67,7 @@ var on_join = function (socket, data, player_id, game_cb) {
 };
 
 var on_deploy = function (emit, data, player_id, game) {
-  log.debug("player " + player_id + " submitted there fleet");
+  log.debug("player " + player_id + " submitted their fleet");
   var set_report = game.do_deploy(player_id, data, game);
   if (set_report !== null) {
     deploy_waiting.push(player_id);
