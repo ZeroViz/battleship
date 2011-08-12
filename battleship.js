@@ -97,7 +97,7 @@ var Battleship = (function () {
         
         // creates a player id and sea for new player
         add_player: function (player_id) {
-            this.players.push(player_id);
+            this.players.push({ id: player_id });
             this.seas[player_id] = Object.create(Sea);
         },
         
@@ -239,10 +239,10 @@ var Battleship = (function () {
             return [loc[0]+offset[0], loc[1]+offset[1]];
         },
 
-        get_ship_deration: function(cord, ori, size){
+        get_ship_deration: function(coord, ori, size){
             var set = []
             
-            var loc = [cord[0], cord[1]]
+            var loc = [coord[0], coord[1]]
             set.push([loc[0], loc[1]])
             
             for (var i=0; i < size-1; i++){
@@ -266,24 +266,20 @@ var Battleship = (function () {
     // creates a populated game object ready to play
     var create_game = function (game_id, players, options) {
         
-        log && log.debug('create_game players received: %s', players);
         var game = Object.create(Battle);
         game.players = [];
         game.seas = {};
-
-        log && log.debug('create_game initial players: %s', game.players);
         
         game.id = game_id;
         game.ruleset = options.ruleset;
         game.ruleset.size = Ruleset[game.ruleset.type].size;
         game.ruleset.ships = Ruleset[game.ruleset.type].ships
         
-        for (player in players) {
-            game.add_player(players[player]);
-        }
-        log && log.debug('create_game set players: %s', game.players);
+        players.forEach(function (player) {
+          game.add_player(player.id);
+        });
+        log && log.debug('create_game with players: %s', game.players);
         return game;
-        
     }
     
     // public methods

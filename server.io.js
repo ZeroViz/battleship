@@ -24,13 +24,13 @@ var get_player_id = function (sessionID) {
 
 var player_socket = {};
 var notify_players = function (game, event, data) {
-    game.players.forEach(function (player_id) {
+    game.players.forEach(function (player) {
         log.debug('emitting game %s to player %s - %s: %s',
                   game.id,
-                  player_id,
+                  player.id,
                   event,
                   JSON.stringify(data));
-        player_socket[player_id].emit(event, data);
+        player_socket[player.id].emit(event, data);
     });
 };
 
@@ -39,15 +39,19 @@ var game_waiting = [];
 var deploy_waiting = [];
 var report_waiting = [];
 
-var on_join = function (socket, data, player_id, game) {
-  game_waiting.push([player_id, game]);
+var on_join = function (socket, data, player_id, game_cb) {
+  // push new player onto stack of waiting players
+  game_waiting.push({ id: player_id,
+                      game_cb: game_cb });
   log.debug('player %s added to waiting list', player_id);
   if (game_waiting.length > 1) {
-    // create new game
+    // create new game if we have enough waiting
     var game = Battleship.create_game(games.length + 1,
-                                      game_waiting.map(function(v){return v[0]}),
+                                      game_waiting,
                                       { ruleset: {type: 'normal'} } );
-    game_waiting.map(function(v){v[1].push(game)});
+    game_waiting.forEach(function (player) {
+      player.game_cb(game)
+    });
     games.push(game);
     game_waiting = [];
     // return ruleset object
@@ -57,9 +61,9 @@ var on_join = function (socket, data, player_id, game) {
     log.debug('game %s created with players %s', game.id, game.players);
     notify_players(game, 'engage', data);
   } else {
-    // wait for another player
+    // wait for more players, notify clients of status
     log.debug('emitting wait to player %s', player_id);
-    socket.emit('wait');
+    socket.emit('wait', { players_needed: 1 });
   }
 }
 
@@ -104,7 +108,7 @@ var on_connection = function (socket) {
     s.player_id = get_player_id(hs.sessionID);
   }
   var player_id = s.player_id;
-  var game = [];
+  var game = null;
 
   player_socket[ s.player_id  ] = socket;
 
@@ -112,24 +116,29 @@ var on_connection = function (socket) {
 
   socket.on('join', function (data) {
     log.debug('event join received %s', JSON.stringify(data));
-    on_join(socket, data, player_id, game);	
+    // callback is used to set the game reference when it is created
+    on_join(socket, data, player_id, function (g) {
+      game = g;
+    });	
   });
 
   socket.on('deploy', function (data){
     log.debug('event deploy received %s', JSON.stringify(data));
     try {
-      on_deploy(data, socket, player_id, game[0]);
+      if (!game) throw { name: 'DeployError', message: 'game is undefined' };
+      on_deploy(data, socket, player_id, game);
     } catch (err) {
-      socket.emit('engage', { errors: ['bad deploy']});
+      socket.emit('engage', { errors: ['bad deploy', err]});
     }
   });
 
   socket.on('enact', function (data) {
     log.debug('event enact received %s', JSON.stringify(data));
     try {
-      on_enact(data, socket, player_id, game[0]);
+      if (!game) throw { name: 'DeployError', message: 'game is undefined' };
+      on_enact(data, socket, player_id, game);
     } catch (err) {
-      socket.emit('report', { errors: ['bad enact']});
+      socket.emit('report', { errors: ['bad enact', err]});
     }
   });
 
