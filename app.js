@@ -12,9 +12,11 @@ var log4js = require('log4js'),
     parseCookie = connect.utils.parseCookie,
     app = express.createServer(),
     io = require('socket.io')
-    .listen(app, { logger: log4js.getLogger('socket'),
-      'log level': log4js.levels.INFO }),
-    bsio = require('./server.io')(io);
+      .listen(app, { logger: log4js.getLogger('socket'),
+                     'log level': log4js.levels.INFO }
+             ),
+    server_io = require('./lib/server.io')
+      .listen(io);
 
 // Configuration
 
@@ -83,6 +85,21 @@ app.get('/', function (req, res) {
 app.get('/feed', function (req, res) {
   res.render('feed', {title: 'News Feed'});
 });
+
+// static routes to common js files
+var add_route = function (file) {
+  app.get('/battleship/' + file, function (req, res, next) {
+    log.info('serving custom file ' + req.url + ' as ' + file);
+    express.static.send(req, res, next, {
+      root: './lib',
+      path: file,
+      getOnly: true
+    });
+  });
+};
+
+add_route('client.io.js');
+add_route('battleship.js');
 
 app.listen(3000);
 log.info("Battleship server listening on port %d in %s mode",
