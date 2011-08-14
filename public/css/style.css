@@ -2,3 +2,45 @@
     font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #333;
 }
+
+.grid {
+  width: 402px;
+  height: 402px;
+  background-color: LightBlue;
+  position: relative;
+}
+
+.grid_cell {
+  width: 30px;
+  height: 30px;
+  margin: 1px;
+  padding: 4px;
+  background-color: Blue;
+  color: White;
+  font-size: 1em;
+  position: absolute;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.grid_rank_1 { top: 1px; }
+.grid_rank_2 { top: 41px; }
+.grid_rank_3 { top: 81px; }
+.grid_rank_4 { top: 121px; }
+.grid_rank_5 { top: 161px; }
+.grid_rank_6 { top: 201px; }
+.grid_rank_7 { top: 241px; }
+.grid_rank_8 { top: 281px; }
+.grid_rank_9 { top: 321px; }
+.grid_rank_10 { top: 361px; }
+
+.grid_file_a { left: 1px; }
+.grid_file_b { left: 41px; }
+.grid_file_c { left: 81px; }
+.grid_file_d { left: 121px; }
+.grid_file_e { left: 161px; }
+.grid_file_f { left: 201px; }
+.grid_file_g { left: 241px; }
+.grid_file_h { left: 281px; }
+.grid_file_i { left: 321px; }
+.grid_file_j { left: 361px; }
