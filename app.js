@@ -16,7 +16,8 @@ var log4js = require('log4js'),
                      'log level': log4js.levels.INFO }
              ),
     server_io = require('./lib/server.io')
-      .listen(io);
+      .listen(io),
+    GameProvider = require('./lib/gameProvider.js').GameProvider;
 
 // Configuration
 
@@ -40,6 +41,10 @@ app.configure('development', function () {
 app.configure('production', function () {
   app.use(express.errorHandler());
 });
+
+// Mongo DB
+
+var gameProvider = new GameProvider('localhost', 27017);
 
 // Socket.IO
 

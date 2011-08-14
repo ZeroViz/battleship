@@ -12,7 +12,8 @@
                       "jade"       : "latest",
                       "socket.io"  : "latest",
                       "log4js"     : "latest",
-                      "vows"       : "latest"
+                      "vows"       : "latest",
+                      "mongodb"    : "latest"
                     },
   "version"       : "0.0.1"
 }
