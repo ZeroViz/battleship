@@ -1,8 +1,124 @@
+/* Reset */
+@import url(http://fonts.googleapis.com/css?family=Rokkitt);
 * {
-    font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
-    color: #333;
+    font-family: Rokkitt, Courier New, Courier, monospace;
+    color: #aaa;
+    margin: 0px;
+    padding: 0px;
 }
 
+body {
+  background-color: #000;
+  font-size: 0.75em;
+}
+
+h1 {
+  font-size: 2em;
+}
+/* End Reset */
+
+#area {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 300px;
+}
+
+/* nav buttons on left side */
+nav {
+  width: 25%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 0;
+}
+
+nav > ul {
+  margin: 0px;
+  padding 0px;
+  border-bottom: solid 1px #000;
+}
+
+nav > ul > li {
+  margin: 0px;
+  display: block;
+  width: 100%;
+  padding: 7px 0px;
+  background: #554;
+  border-top: solid 1px #000;
+  font-size: 1.5em;
+  text-align: center;
+  text-shadow: #000 1px 1px 1px;
+  box-shadow:inset -2px -2px 7px #181810;
+}
+
+#events {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  background: #040804;
+  box-shadow:inset 0 0 7px #353;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  vertical-align: bottom;
+  overflow: hidden;
+}
+
+#eventlist {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  margin: 5px;
+  font-size: 0.75em;
+  font-family: monospace;
+}
+
+#eventlist p {
+  color: #353;
+}
+/* pages */
+
+#area > section {
+  width: 75%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  z-index: 3;
+  background-color: #111;
+  padding: 0px;
+  margin: 0px;
+  border-left: solid 1px black;
+}
+
+#splash {
+}
+
+#splash header {
+  text-align: center;
+  margin: 20% 0px;
+  text-shadow: #555 1px 1px 1px, #000 -1px -1px -1px;
+}
+#splash h1 {
+  text-align: center;
+  color: #222;
+  font-size: 5em;
+  margin: 10% 0px;
+}
+#splash h2 {
+  text-align: center;
+  color: #222;
+}
+
+#controls {
+  display: none;
+}
+#lobby {
+  display: none;
+}
 .grid {
   width: 402px;
   height: 402px;

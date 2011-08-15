@@ -1,37 +1,38 @@
 - if (!sess) var sess = '?'
-header
-    hgroup
-        h1 Welcome To Battleship!
+section#area
+  nav
+    ul
+      li Splash
+      li 10 Forward
+    section#events
+      section#eventlist
+  section#splash
+    header
+      hgroup
+        h2 Welcome to
+        h1 Battleship!
         h2 Sink your friends...
-section#lobby
+  section#lobby
     header
-        h1 Find people to play with
+      h1 Find people to play with
     #profile
-        p Your session is #{sess}
+      p Your session is #{sess}
     #logged_in
-        ul#logged_in
+      ul#logged_in
         form#start
-            input(type="button",value="Create Game")
-            input(type="button",value="Invite Friend")
+          input(type="button",value="Create Game")
+          input(type="button",value="Invite Friend")
     #in_progress
-        ul#full
-        ul#open
-        ul#finished
-section#games
-section#controls
+      ul#full
+      ul#open
+      ul#finished
+    section#chat
+      section#lobby_chat
+  section#controls
     div
-        input(type="button",value="emit",disabled,id="emit_button")
+      input(type="button",value="emit",disabled,id="emit_button")
     div
-        input(type="text",value="join",id="emit_event")
+      input(type="text",value="join",id="emit_event")
     div
-        textarea(value="{}",rows=5,cols=40,id="emit_data")
-section#chat
-    section#lobby_chat
-    //
-        section#game_1293_chat
-            p hello
-        section#player_ben_chat
-            p welcome
-section#events
-    header
-      h1 Event Log
+      textarea(value="{}",rows=5,cols=40,id="emit_data")
+audio(id="tt",src="/audio/tt.wav",preload="auto")
