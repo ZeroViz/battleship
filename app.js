@@ -75,20 +75,10 @@ io.configure(function () {
 });
 
 
-io.sockets.on('connection', function (socket) {
-  var hs = socket.handshake;
-  // join private room for session
-  socket.join(hs.sessionID);
-});
-
 // Routes
 
 app.get('/', function (req, res) {
   res.render('index', {sess: req.sessionID});
-});
-
-app.get('/feed', function (req, res) {
-  res.render('feed', {title: 'News Feed'});
 });
 
 // static routes to common js files
