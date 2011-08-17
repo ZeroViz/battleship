@@ -92,7 +92,7 @@ var add_route = function (file) {
 add_route('client.io.js');
 add_route('battleship.js');
 
-app.listen(80);
+app.listen(3000);
 log.info("Battleship server listening on port %d in %s mode",
     app.address().port,
     app.settings.env);
