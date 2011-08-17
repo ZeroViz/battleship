@@ -6,7 +6,8 @@ var log4js = require('log4js'),
     log = log4js.getLogger('app'),
     express = require('express'),
     MemoryStore = express.session.MemoryStore,
-    sessionStore = new MemoryStore(),
+    RedisStore = require('connect-redis')(express),
+    sessionStore = new RedisStore(),
     connect = require('express/node_modules/connect'),
     Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie,
@@ -16,8 +17,7 @@ var log4js = require('log4js'),
                      'log level': log4js.levels.INFO }
              ),
     server_io = require('./lib/server.io')
-      .listen(io),
-    GameProvider = require('./lib/gameProvider.js').GameProvider;
+      .listen(io);
 
 // Configuration
 
@@ -41,10 +41,6 @@ app.configure('development', function () {
 app.configure('production', function () {
   app.use(express.errorHandler());
 });
-
-// Mongo DB
-
-var gameProvider = new GameProvider('localhost', 27017);
 
 // Socket.IO
 

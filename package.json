@@ -13,7 +13,8 @@
                       "socket.io"  : "latest",
                       "log4js"     : "latest",
                       "vows"       : "latest",
-                      "mongodb"    : "latest"
+                      "mongodb"    : "latest",
+                      "connect-redis": "latest"
                     },
   "version"       : "0.0.1"
 }
