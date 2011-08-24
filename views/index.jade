@@ -31,36 +31,29 @@ section#area
       section#lobby_chat
   section#controls
     div
-      input(type="button",value="emit",disabled,id="emit_button")
+      input(type="button",value="deploy",disabled,id="deploy_button")
     div
-      input(type="text",value="deploy",id="emit_event")
+      textarea(value="{}",rows=5,cols=40,id="deploy_data")
+        { "ships": [ { "type": "battleship",
+                       "loc": [0,0],
+                       "ori": "s" },
+                     { "type": "carrier",
+                       "loc": [2,0],
+                       "ori": "e" },
+                     { "type": "destroyer",
+                       "loc": [2,1],
+                       "ori": "s" },
+                     { "type": "submarine",
+                       "loc": [5,5],
+                       "ori": "w" },
+                     { "type": "cruiser",
+                       "loc": [6,8],
+                       "ori": "n" } ] }
     div
-      textarea(value="{}",rows=5,cols=40,id="emit_data")
-        {"ships":[{
-        "type": "battleship",
-        "loc": [0,0],
-        "ori": "s"
-        },
-        {
-        "type": "carrier",
-        "loc": [2,0],
-        "ori": "e"
-        },
-        {
-        "type": "destroyer",
-        "loc": [2,1],
-        "ori": "s"
-        },
-        {
-        "type": "submarine",
-        "loc": [5,5],
-        "ori": "w"
-        },
-        {
-        "type": "cruiser",
-        "loc": [6,8],
-        "ori": "n"
-        }]}
+      input(type="button",value="enact",disabled,id="enact_button")
+    div
+      textarea(value="{}",rows=5,cols=40,id="enact_data")
+        { "type": "shot", "loc": [0, 0] }
   audio(id="tt",preload="auto")
   source(src="/audio/tt.mp3")
   source(src="/audio/tt.wav")
