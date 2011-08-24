@@ -14,7 +14,8 @@
                       "log4js"     : "latest",
                       "vows"       : "latest",
                       "mongodb"    : "latest",
-                      "connect-redis": "latest"
+                      "connect-redis": "latest",
+                      "redis"      : "latest"
                     },
   "version"       : "0.0.1"
 }
