@@ -34,6 +34,33 @@ vows.describe('Creating a Game').addBatch({
         assert.deepEqual(topic.ruleset, Battleship.Ruleset.normal);
         assert.equal(topic.id, 2);
       }
-    }
+    },
+    'we will deploy a fleet': {
+      topic: function() { return Battleship.do_deploy(
+               1, {"ships":[{
+                   "type": "battleship",
+                   "loc": [0,0],
+                   "ori": "s"
+                  },
+                  {
+                   "type": "carrier",
+                   "loc": [2,0],
+                   "ori": "e"
+                  },
+                  {
+                   "type": "destroyer",
+                   "loc": [2,1],
+                   "ori": "s"
+                  },
+                  {
+                   "type": "submarine",
+                   "loc": [5,5],
+                   "ori": "w"
+                  },
+                  {
+                   "type": "cruiser",
+                   "loc": [6,8],
+                   "ori": "n"
+                  }]})
   }
 }).export(module);
