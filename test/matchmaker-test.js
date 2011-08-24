@@ -2,19 +2,13 @@
 
 var vows = require('vows'),
     assert = require('assert'),
-    MatchMaker = require('../lib/matchmaker.js'),
-
-    create_game = function (players) {
-      return { name: 'game',
-               players: players.map(function (value) {
-                 return typeof value === 'object' ? value.id : value;
-               })
-             };
-};
+    MatchMaker = require('../lib/matchmaker.js');
 
 vows.describe('Using the MatchMaker').addBatch({
   'when creating a new matchmaker': {
-    topic: function () { return MatchMaker(create_game, { logLevel: 'ERROR' }); },
+    topic: function () {
+      return MatchMaker({ logLevel: 'ERROR' });
+    },
     
     'we get a proper matchmaker object without errors': function (topic) {
       assert.equal(typeof topic, 'object');
@@ -22,23 +16,66 @@ vows.describe('Using the MatchMaker').addBatch({
       assert.equal(typeof topic.remove_player, 'function');
     }
   },
+  'when we add 1 player to a fifo queue': {
+    topic: function () {
+      var mm = MatchMaker({ logLevel: 'ERROR' });
+      mm.add_player({ id: 1 });
+      return mm.get_waiting();
+    },
+
+    'we remember they are in the queue': function (topic) {
+      assert.deepEqual(topic, [
+          { matchtype: 'fifo',
+            max: 2,
+            ruleset: 'normal',
+            players: [{ id: 1 }]
+          }
+      ]);
+    }
+  },
   'when we add 2 players to a fifo queue': {
     topic: function () {
-             var mm = MatchMaker(create_game, { logLevel: 'ERROR' });
-             var game1, game2;
-             mm.add_player(1, function (game) { game1 = game });
-             mm.add_player(2, function (game) { game2 = game });
-             return [game1, game2];
-           },
+      var mm = MatchMaker({ logLevel: 'ERROR' });
+      mm.add_player({ id: 1, extra: 'test' });
+      return mm.add_player({ id: 2 });
+    },
 
-    'we get a game object for each player': function (topic) {
+    'we get a list containing the two players': function (topic) {
       assert.deepEqual(topic, [
-        { name: 'game',
-          players: [1,2]
-        },
-        { name: 'game',
-          players: [1,2]
-        }]);
+        { id: 1, extra: 'test' },
+        { id: 2 }
+      ]);
+    }
+  },
+  'when we add the same player twice': {
+    topic: function () {
+      var mm = MatchMaker({ logLevel: 'ERROR' });
+      mm.add_player({ id: 1 });
+      return mm.add_player({ id: 1 });
+    },
+
+    'we do not get a list yet': function (topic) {
+      assert.deepEqual(topic, null);
+    }
+  },
+  'when we add a player to some games and then remove': {
+    topic: function () {
+      var mm = MatchMaker({ logLevel: 'ERROR' });
+      mm.add_player({ id: 1 }, { max: 3 });
+      mm.add_player({ id: 2 }, { max: 3 });
+      mm.add_player({ id: 1 });
+      mm.remove_player({ id: 1 });
+      return mm.get_waiting();
+    },
+
+    'we remember only games with remaining players': function (topic) {
+      assert.deepEqual(topic, [
+          { matchtype: 'fifo',
+            max: 3,
+            ruleset: 'normal',
+            players: [{ id: 2 }]
+          }
+      ]);
     }
   }
 }).export(module);
