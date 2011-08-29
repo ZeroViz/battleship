@@ -3,20 +3,20 @@
 var vows = require('vows'),
     assert = require('assert'),
     Battleship = require('../lib/battleship.js');
-//Battleship.log.setLevel('ERROR');
+Battleship.log.setLevel('ERROR');
 
 var test_action = {
   id: 1,
   type: "shot",
-  loc: [0, 0]
+  loc: [6, 8]
 };
 
 var test_action_report = {
   id: 1,
   type: 'shot',
-  loc: [0, 0],
+  loc: [6, 8],
   reports: [
-    { loc: [0, 0],
+    { loc: [6, 8],
       affect: 'hit' }
   ]
 };
@@ -69,7 +69,35 @@ vows.describe('Creating a Game').addBatch({
       },
 
       'does not change the game': function (topic) {
-        assert.equal(topic.seas[1].actions[0].loc[0], 0);
+        assert.equal(topic.seas[1].actions[0].loc[0], 6);
+      }
+    },
+
+    'and hitting all spaces on a ship': {
+      topic: function() {
+        test_game.start_turn();
+        test_game.do_enact(1, {
+          id: 1,
+          type: 'shot',
+          loc: [6, 7]
+        });
+        test_game.print();
+        return test_game.get_report()[0];
+      },
+
+      'the report shows the ship is sunk': function (topic) {
+        assert.deepEqual(topic, {
+          id: 1,
+          type: 'shot',
+          loc: [ 6, 7 ],
+          reports: [
+            {
+              loc: [ 6, 7 ],
+              affect: 'sunk',
+              ship: { type: 'cruiser' }
+            }
+          ]
+        });
       }
     }
   }
