@@ -21,6 +21,7 @@ vows.describe('Creating a Game').addBatch({
       assert.deepEqual(topic.ruleset, Battleship.Ruleset.normal);
       assert.equal(topic.id, 1);
     },
+
     'and then creating a second game': {
       topic: function () { return Battleship.create_game({
                id: 2,
@@ -35,6 +36,7 @@ vows.describe('Creating a Game').addBatch({
         assert.equal(topic.id, 2);
       }
     },
+
     'we will deploy a fleet': {
       topic: function() { return Battleship.do_deploy(
                1, {"ships":[{
@@ -62,5 +64,7 @@ vows.describe('Creating a Game').addBatch({
                    "loc": [6,8],
                    "ori": "n"
                   }]})
+      }
+    }
   }
 }).export(module);

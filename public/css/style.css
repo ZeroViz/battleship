@@ -126,6 +126,14 @@ nav > ul > li {
   position: relative;
 }
 
+#controls pre {
+  font-size: 0.5em;
+}
+
+#controls input {
+  font-size: 1em;
+}
+
 .grid_cell {
   width: 30px;
   height: 30px;
