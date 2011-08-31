@@ -119,12 +119,6 @@ nav > ul > li {
 #lobby {
   display: none;
 }
-.grid {
-  width: 402px;
-  height: 402px;
-  background-color: LightBlue;
-  position: relative;
-}
 
 #controls pre {
   font-size: 0.5em;
@@ -132,6 +126,13 @@ nav > ul > li {
 
 #controls input {
   font-size: 1em;
+}
+
+.grid {
+  width: 402px;
+  height: 402px;
+  background-color: LightBlue;
+  position: relative;
 }
 
 .grid_cell {
