@@ -35,7 +35,26 @@ var test_deploy = {
     "ori": "n" } ]
          },
 
-         fleet_full: {
+  overlap_fleet: {
+  "ships": [
+  { "type": "battleship",
+    "loc": [0,0],
+    "ori": "s" },
+  { "type": "carrier",
+    "loc": [2,0],
+    "ori": "e" },
+  { "type": "destroyer",
+    "loc": [0,3],
+    "ori": "s" },
+  { "type": "submarine",
+    "loc": [5,5],
+    "ori": "w" },
+  { "type": "cruiser",
+    "loc": [6,8],
+    "ori": "n" } ]
+         },
+
+  fleet_full: {
   "ships": [
   { "type": "battleship",
     "loc": [0,0],
@@ -87,6 +106,16 @@ vows.describe('Creating a Game').addBatch({
       'does not change the game': function (topic) {
         assert.equal(topic.seas[1].fleet.ships[0].loc[0], 0);
       }
+    }
+  },
+   
+  'when deploying a fleet with overlapping ships': {
+    topic: function () {
+      var object = test_deploy.game.do_deploy(1, test_deploy.overlap_fleet);
+      return object  
+    },
+    'an error will result': function (topic) {
+       assert.equal(object, 'position [0,3] is overlapping');
     }
   }
 }).export(module);
