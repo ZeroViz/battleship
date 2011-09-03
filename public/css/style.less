@@ -1,14 +1,24 @@
+/* Colors */
+@background: #000;
+@color: #aaa;
+
+@sea: #004;
+@sea_cell: #005;
+@sea_sel: #009;
+@sea_hit: #a59;
+@sea_miss: #eef;
+/* End Colors */
+
 /* Reset */
-@import url(http://fonts.googleapis.com/css?family=Rokkitt);
 * {
     font-family: Rokkitt, Courier New, Courier, monospace;
-    color: #aaa;
+    color: @color;
     margin: 0px;
     padding: 0px;
 }
 
 body {
-  background-color: #000;
+  background-color: @background;
   font-size: 0.75em;
 }
 
@@ -37,7 +47,7 @@ nav {
 
 nav > ul {
   margin: 0px;
-  padding 0px;
+  padding: 0px;
   border-bottom: solid 1px #000;
 }
 
@@ -131,7 +141,7 @@ nav > ul > li {
 .grid {
   width: 402px;
   height: 402px;
-  background-color: LightBlue;
+  background-color: @sea;
   position: relative;
 }
 
@@ -139,13 +149,25 @@ nav > ul > li {
   width: 30px;
   height: 30px;
   margin: 1px;
-  padding: 4px;
-  background-color: Blue;
+  padding: 0px;
+  background-color: @sea_cell;
   color: White;
   font-size: 1em;
   position: absolute;
   border-radius: 10px;
   text-align: center;
+}
+
+.selected {
+  background-color: @sea_sel;
+}
+
+.hit {
+  background-color: @sea_hit;
+}
+
+.miss {
+  background-color: @sea_miss;
 }
 
 .grid_rank_1 { top: 1px; }
