@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -11,7 +10,7 @@ var log4js = require('log4js'),
     connect = require('express/node_modules/connect'),
     Session = connect.middleware.session.Session,
     parseCookie = connect.utils.parseCookie,
-    app = express.createServer(),
+    app = module.exports = express.createServer(),
     io = require('socket.io')
       .listen(app, { logger: log4js.getLogger('socket'),
                      'log level': log4js.levels.INFO }
@@ -25,6 +24,8 @@ app.configure(function () {
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
   app.use(express.cookieParser());
+  app.use(express.methodOverride());
+  app.use(express.compiler({ src: __dirname + '/public', enable: ['less'] }));
   app.use(express.session({
     store: sessionStore,
     secret: 'secret',

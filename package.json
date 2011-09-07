@@ -9,6 +9,7 @@
                   ],
   "dependencies"  : {
                       "express"    : "latest",
+                      "less"       : "latest",
                       "jade"       : "latest",
                       "socket.io"  : "latest",
                       "log4js"     : "latest",
