@@ -60,27 +60,27 @@ var test_deploy = {
     "loc": [0,0],
     "ori": "s",
     "size": 4,
-    "status": [0, 0, 0, 0] },
+    "status": []},
   { "type": "carrier",
     "loc": [2,0],
     "ori": "e",
     "size": 5,
-    "status": [0, 0, 0, 0, 0] },
+    "status": []},
   { "type": "destroyer",
     "loc": [2,1],
     "ori": "s",
     "size": 3,
-    "status": [0, 0, 0] },
+    "status": []},
   { "type": "submarine",
     "loc": [5,5],
     "ori": "w",
     "size": 3,
-    "status": [0, 0, 0] },
+    "status": []},
   { "type": "cruiser",
     "loc": [6,8],
     "ori": "n",
     "size": 2,
-    "status": [0, 0] } ]
+    "status": [] } ]
 }
 };
 
@@ -115,7 +115,7 @@ vows.describe('Creating a Game').addBatch({
       return object  
     },
     'an error will result': function (topic) {
-       assert.equal(object, 'position [0,3] is overlapping');
+       assert.deepEqual(topic, ['position 0,3 is overlapping']);
     }
   }
 }).export(module);
