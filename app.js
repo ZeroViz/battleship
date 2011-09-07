@@ -28,7 +28,8 @@ app.configure(function () {
   app.use(express.session({
     store: sessionStore,
     secret: 'secret',
-    key: 'express.sid'
+    key: 'express.sid',
+    cookie: {maxAge: 31557600000 }
   }));
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
