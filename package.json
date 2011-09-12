@@ -13,7 +13,7 @@
                       "socket.io"  : "latest",
                       "log4js"     : "latest",
                       "vows"       : "latest",
-                      "mongodb"    : "latest",
+                      "mongodb"    : "0.9.6-9",
                       "connect-redis": "latest",
                       "redis"      : "latest"
                     },
