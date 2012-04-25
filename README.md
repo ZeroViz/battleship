@@ -1,7 +1,7 @@
-install node
-install npm
-install redis
-install mongodb
+* install node
+* install npm
+* install redis
+* install mongodb
 
 clone the project
 run `npm install` to get the dependencies
