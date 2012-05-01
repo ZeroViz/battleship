@@ -32,22 +32,14 @@ section#area
     div
       input(type="button",value="deploy",disabled,id="deploy_button")
     div
-      textarea(value="{}",rows=5,cols=40,id="deploy_data")
-        { "ships": [ { "type": "battleship",
-                       "loc": [0,0],
-                       "ori": "s" },
-                     { "type": "carrier",
-                       "loc": [2,0],
-                       "ori": "e" },
-                     { "type": "destroyer",
-                       "loc": [2,1],
-                       "ori": "s" },
-                     { "type": "submarine",
-                       "loc": [5,5],
-                       "ori": "w" },
-                     { "type": "cruiser",
-                       "loc": [6,8],
-                       "ori": "n" } ] }
+      textarea(value="{}",rows=5,cols=40,id="deploy_data").
+        { "ships": [
+          { "type": "battleship", "loc": [0,0], "ori": "s" },
+          { "type": "carrier",    "loc": [2,0], "ori": "e" },
+          { "type": "destroyer",  "loc": [2,1], "ori": "s" },
+          { "type": "submarine",  "loc": [5,5], "ori": "w" },
+          { "type": "cruiser",    "loc": [6,8], "ori": "n" }
+        ] }
     div
       input(type="button",value="enact",disabled,id="enact_button")
     div
