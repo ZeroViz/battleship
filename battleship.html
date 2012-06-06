@@ -3,9 +3,38 @@
     <head>
         <meta charset="utf-8" />
         <title>Battleship Game Class</title>
-        <script src="battleship.js"></script>
+        <script src="lib/battleship.js" type="text/javascript"></script>
+        <script type="text/javascript">
+        	// start a new battleship game
+        	
+        	/*
+        	Battleship.create_game({
+        		options: {
+        			players: {
+        			
+        			}
+        		}
+        	});
+        	*/
+        	
+        	//TODO: deploy ships
+        	
+        	//TODO: send fire command
+        	var fire = function(){
+        		var x = document.getElementById("row");
+        		var y = document.getElementById("col");
+        	}
+        </script>
     </head>
     <body>
         <h1>Battleship</h1>
+        
+        Reports <br />
+        <textarea rows="20" cols="40"></textarea><br />
+        
+        Number Column: <input type="text" value="2" id="row"><br />
+        Letter Row: <input type="text" value="2" id="row" /><br />
+        Fire: <input type="button" value="FIRE!" id="fire" />
+        
     </body>
 </html>
